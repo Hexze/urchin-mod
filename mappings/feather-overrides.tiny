@@ -1,0 +1,5 @@
+tiny	2	0	intermediary	named
+c	net/minecraft/client/Minecraft	net/minecraft/client/Minecraft
+	m	()Lnet/minecraft/unmapped/C_87604186;	m_69521290	getUser
+c	net/minecraft/unmapped/C_87604186	net/minecraft/client/User
+	m	()Ljava/lang/String;	m_46001946	getName

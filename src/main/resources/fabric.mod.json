@@ -1,0 +1,32 @@
+{
+    "schemaVersion": 1,
+    "id": "${mod_id}",
+    "version": "${mod_version}",
+    "name": "${mod_name}",
+    "description": "Urchin blacklist tags for Hypixel.",
+    "authors": [
+        "Hexze"
+    ],
+    "contact": {
+        "homepage": "https://urchin.gg"
+    },
+    "icon": "assets/${mod_id}/icon.png",
+    "environment": "client",
+    "entrypoints": {
+        "client": [
+            {
+                "adapter": "kotlin",
+                "value": "gg.urchin.UrchinEntrypoint"
+            }
+        ]
+    },
+    "mixins": [
+        "${mod_id}.mixins.json"
+    ],
+    "depends": {
+        "fabricloader": ">=${loader_version}",
+        "minecraft": "${minecraft_version_range}",
+        "oneconfigv1": ">=${oneconfig_version}",
+        "fabric-language-kotlin": ">=1.14.1+kotlin.2.4.20"
+    }
+}

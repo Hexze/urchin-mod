@@ -1,0 +1,15 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "gg.urchin.mixin",
+    "compatibilityLevel": "JAVA_21",
+    "client": [
+        //? if = 1.8.9
+        //"ArgentumTextBatcherMixin",
+        //? if = 1.8.9
+        //"TextRendererMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

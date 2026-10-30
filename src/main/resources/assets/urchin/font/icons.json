@@ -1,0 +1,11 @@
+{
+    "providers": [
+        {
+            "type": "bitmap",
+            "file": "urchin:font/logo.png",
+            "height": 9,
+            "ascent": 8,
+            "chars": [""]
+        }
+    ]
+}
