@@ -51,3 +51,9 @@ data class PlayerTags(
     @SerialName("displayname") val displayName: String? = null,
     val tags: List<Tag> = emptyList(),
 )
+
+@Serializable
+data class TagBatch(
+    val players: Map<String, List<Tag>> = emptyMap(),
+    @SerialName("displaynames") val displayNames: Map<String, String> = emptyMap(),
+)

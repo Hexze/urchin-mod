@@ -18,6 +18,13 @@ object UrchinConfig : KtConfig(
 ) {
     var enabled by masterToggle()
 
+    var alerts by switch(
+        name = "Enabled",
+        def = true,
+        description = "Send a chat alert when a tagged player joins your game.",
+        subcategory = ALERTS,
+    )
+
     var alertSound by switch(
         name = "Sound",
         def = true,

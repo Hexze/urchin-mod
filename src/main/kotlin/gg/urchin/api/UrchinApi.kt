@@ -29,8 +29,8 @@ object UrchinApi {
     private val http = HttpClient.newBuilder().connectTimeout(TIMEOUT).build()
     private var token: CompletableFuture<String>? = null
 
-    fun lookupTags(uuids: List<String>): CompletableFuture<Map<String, List<Tag>>> =
-        authorized(request("/v3/players").json("POST", BatchRequest(uuids))).thenApply { decode<BatchResponse>(it).players }
+    fun lookupTags(uuids: List<String>): CompletableFuture<TagBatch> =
+        authorized(request("/v3/players").json("POST", BatchRequest(uuids))).thenApply { decode<TagBatch>(it) }
 
     fun lookupPlayer(identifier: String): CompletableFuture<PlayerTags?> =
         authorized(request("/v3/player/tags?${playerQuery(identifier)}").GET())
@@ -119,9 +119,6 @@ private class LoginResponse(val token: String)
 
 @Serializable
 private class BatchRequest(val uuids: List<String>)
-
-@Serializable
-private class BatchResponse(val players: Map<String, List<Tag>> = emptyMap())
 
 @Serializable
 private class AddTag(val type: String, val reason: String)
