@@ -8,6 +8,7 @@ import gg.urchin.client.TaggedPlayer
 import gg.urchin.client.UrchinConfig
 import gg.urchin.client.alerts.Alerts
 import gg.urchin.client.alerts.Party
+import gg.urchin.client.chat.ChatHistory
 import net.hypixel.data.type.GameType
 import org.apache.logging.log4j.LogManager
 import org.polyfrost.oneconfig.api.event.v1.eventHandler
@@ -28,6 +29,7 @@ private data class Lookup(val player: ListedPlayer, val account: UUID)
 
 object TagLookups {
     private class Visit {
+        private val startedAt = ChatHistory.currentTick()
         private val listed = mutableListOf<ListedPlayer>()
         private val lookedUp = mutableSetOf<UUID>()
         private var located = false
@@ -71,6 +73,7 @@ object TagLookups {
             if (this !== visit || tagged.isEmpty()) return
             TaggedPlayers.add(tagged)
             alert(tagged)
+            ChatLabels.labelEarlier(tagged.map { it.player.name }, startedAt)
         }
 
         private fun alert(tagged: List<TaggedPlayer>) {

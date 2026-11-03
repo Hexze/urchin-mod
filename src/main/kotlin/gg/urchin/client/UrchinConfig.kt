@@ -65,6 +65,13 @@ object UrchinConfig : KtConfig(
         subcategory = LABELS,
     )
 
+    var chatLabels by switch(
+        name = "Chat",
+        def = true,
+        description = "Show tags next to tagged players' names in chat. Hover a tag for the details.",
+        subcategory = LABELS,
+    )
+
     var ignoreSelf by switch(
         name = "Ignore Yourself",
         def = true,
