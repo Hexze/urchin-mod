@@ -6,6 +6,7 @@ import org.polyfrost.oneconfig.api.platform.v1.DesktopHelper
 import java.net.URI
 
 private const val ALERTS = "Alerts"
+private const val LABELS = "Labels"
 private const val FILTERS = "Filters"
 private const val ACCOUNT = "Account"
 private val DISCORD_INVITE = URI("https://discord.gg/urchin")
@@ -50,17 +51,31 @@ object UrchinConfig : KtConfig(
         subcategory = ALERTS,
     )
 
+    var tabLabels by switch(
+        name = "Tab List",
+        def = true,
+        description = "Show each tagged player's tag next to their name in the tab list.",
+        subcategory = LABELS,
+    )
+
+    var nametagLabels by switch(
+        name = "Nametags",
+        def = true,
+        description = "Show each tagged player's tag next to the name above their head.",
+        subcategory = LABELS,
+    )
+
     var ignoreSelf by switch(
         name = "Ignore Yourself",
         def = true,
-        description = "Skip alerts for your own tags.",
+        description = "Skip alerts for your own tags. Your labels still show.",
         subcategory = FILTERS,
     )
 
     var ignoreParty by switch(
         name = "Ignore Your Party",
         def = false,
-        description = "Skip alerts for players in your Hypixel party.",
+        description = "Skip alerts for players in your Hypixel party. Their labels still show.",
         subcategory = FILTERS,
     )
 

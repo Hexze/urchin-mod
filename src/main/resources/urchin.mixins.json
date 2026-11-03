@@ -7,7 +7,12 @@
         //? if = 1.8.9
         //"ArgentumTextBatcherMixin",
         //? if = 1.8.9
-        //"TextRendererMixin"
+        //"PlayerEntityMixin",
+        //? if = 1.8.9
+        //"TextRendererMixin",
+        //? if > 1.8.9
+        "EntityRendererMixin",
+        "PlayerTabOverlayMixin"
     ],
     "injectors": {
         "defaultRequire": 1
