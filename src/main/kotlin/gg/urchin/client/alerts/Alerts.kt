@@ -9,6 +9,7 @@ import gg.urchin.client.chat.SEPARATOR
 import gg.urchin.client.chat.TagText
 import gg.urchin.client.chat.lines
 import gg.urchin.client.chat.suggesting
+import gg.urchin.client.tags.isLiveNick
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import java.util.UUID
@@ -35,10 +36,15 @@ private fun message(tagged: TaggedPlayer): Component {
     return lines(listOf(line, SEPARATOR) + TagText.stacked(tagged.tags) { TagText.details(it, name) } + SEPARATOR)
 }
 
-private fun shownName(tagged: TaggedPlayer): Component =
-    Game.tabName(tagged.player.uuid)
-        ?: tagged.displayName?.let(Component::text)
-        ?: Component.text(tagged.player.name, NamedTextColor.WHITE)
+private fun shownName(tagged: TaggedPlayer): Component {
+    val listed = Game.tabName(tagged.player.uuid)
+    val real = tagged.displayName?.let(Component::text)
+    val plain = Component.text(tagged.player.name, NamedTextColor.WHITE)
+    if (!tagged.player.uuid.isLiveNick()) return listed ?: real ?: plain
+    val nick = listed ?: plain
+    if (real == null) return nick
+    return Component.textOfChildren(nick, Component.text(" (", NamedTextColor.GRAY), real, Component.text(")", NamedTextColor.GRAY))
+}
 
 private fun ignored(tagged: TaggedPlayer, partyMembers: Set<UUID>): Boolean =
     (UrchinConfig.ignoreSelf && tagged.player.name.equals(MinecraftSession.username, ignoreCase = true)) ||
