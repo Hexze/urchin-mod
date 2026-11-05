@@ -11,5 +11,7 @@ object UrchinClient {
         TagLookups.register()
         //? if > 1.8.9
         ChatLabels.register()
+        //? if = 1.8.9
+        /*StarfishPlugin.register()*/
     }
 }
