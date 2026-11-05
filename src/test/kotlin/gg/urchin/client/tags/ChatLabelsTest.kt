@@ -9,9 +9,10 @@ import org.junit.jupiter.api.Test
 
 private val NAMES = namePattern(listOf("Sniper", "Bob"))
 
-private fun labeled(message: Component): Component = labelNames(message, NAMES) { listOf(Component.text("[CC]")) }
+private fun labeled(message: Component, skipBadged: Boolean = false): Component =
+    labelNames(message, NAMES, skipBadged) { listOf(Component.text("[CC]")) }
 
-private fun labeled(text: String): Component = labeled(Component.text(text))
+private fun labeled(text: String, skipBadged: Boolean = false): Component = labeled(Component.text(text), skipBadged)
 
 private fun Component.pieces(): List<String> =
     listOf((this as TextComponent).content()).filter { it.isNotEmpty() } + children().flatMap { it.pieces() }
@@ -56,6 +57,20 @@ class ChatLabelsTest {
             listOf("§b[MVP§c+§b] Sniper", " ", "[CC]", "§b§f: gg"),
             labeled("§b[MVP§c+§b] Sniper§f: gg").pieces(),
         )
+    }
+
+    @Test
+    fun `leaves names that already carry a badge alone when asked to`() {
+        assertEquals(listOf("§7Sniper §8[§7C§8] §7FKDR"), labeled("§7Sniper §8[§7C§8] §7FKDR", skipBadged = true).pieces())
+        assertEquals(
+            listOf("Bob", " ", "[CC]", " and Sniper ", "[C]"),
+            labeled(Component.text("Bob and Sniper ").append(Component.text("[C]", NamedTextColor.GRAY)), skipBadged = true).pieces(),
+        )
+    }
+
+    @Test
+    fun `labels names that already carry a badge otherwise`() {
+        assertEquals(listOf("§7Sniper", " ", "[CC]", "§7 §8[§7C§8] §7FKDR"), labeled("§7Sniper §8[§7C§8] §7FKDR").pieces())
     }
 
     @Test

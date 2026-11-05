@@ -18,7 +18,8 @@ private const val UNLOAD_CHANNEL = "starfish:unload"
 private const val LISTENING: Byte = 1
 
 object StarfishPlugin {
-    private var listening = false
+    var listening = false
+        private set
     private var reported: List<String>? = null
 
     fun register() {
@@ -67,4 +68,10 @@ private fun handledFeatures(): List<String> =
             "nametags".takeIf { UrchinConfig.nametagLabels },
         )
     }
-*///?}
+*///?} else {
+package gg.urchin.client
+
+object StarfishPlugin {
+    val listening = false
+}
+//?}

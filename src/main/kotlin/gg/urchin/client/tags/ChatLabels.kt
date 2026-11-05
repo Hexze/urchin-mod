@@ -1,11 +1,13 @@
 package gg.urchin.client.tags
 
+import gg.urchin.client.StarfishPlugin
 import gg.urchin.client.UrchinConfig
 import gg.urchin.client.chat.Chat
 import gg.urchin.client.chat.ChatHistory
 import gg.urchin.client.chat.TagText
 import gg.urchin.client.chat.activeFormatting
 import gg.urchin.client.chat.namePattern
+import gg.urchin.client.chat.startsWithTagBadge
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
@@ -57,19 +59,22 @@ object ChatLabels {
 
     private fun labeled(message: Component, names: Regex): Component {
         if (Chat.isOwn(message)) return message
-        return labelNames(message, names) { name -> TagText.badges(TaggedPlayers.tagsNamed(name), name) }
+        return labelNames(message, names, skipBadged = StarfishPlugin.listening) { name -> TagText.badges(TaggedPlayers.tagsNamed(name), name) }
     }
 }
 
-internal fun labelNames(message: Component, names: Regex, badges: (String) -> List<Component>): Component {
+internal fun labelNames(message: Component, names: Regex, skipBadged: Boolean, badges: (String) -> List<Component>): Component {
     val bodyStart = senderColonOffset(message) ?: Int.MAX_VALUE
+    val content = segments(message, inheritedNeutral = true).joinToString("") { it.text }
     var offset = 0
 
     fun label(component: Component): Component {
         val text = (component as? TextComponent)?.content().orEmpty()
         val start = offset
         offset += text.length
-        val found = names.findAll(text).filter { start + it.range.first < bodyStart }.toList()
+        val found = names.findAll(text)
+            .filter { start + it.range.first < bodyStart && !(skipBadged && startsWithTagBadge(content, start + it.range.last + 1)) }
+            .toList()
         val children = component.children().map(::label)
         if (found.isEmpty()) return component.children(children)
         return (component as TextComponent).content("").children(splitAfterNames(text, found, badges) + children)

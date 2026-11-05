@@ -1,7 +1,9 @@
 package gg.urchin.client.tags
 
 import gg.urchin.api.TagType
+import gg.urchin.client.StarfishPlugin
 import gg.urchin.client.UrchinConfig
+import gg.urchin.client.chat.containsTagBadge
 import net.kyori.adventure.text.format.NamedTextColor
 import java.util.UUID
 //? if = 1.8.9 {
@@ -29,7 +31,7 @@ object TagLabels {
     //? if = 1.8.9 {
     /*@JvmStatic
     fun tabName(player: PlayerInfo, name: String): String =
-        labelFor(player.profile.id, UrchinConfig.tabLabels)
+        labelFor(player.profile.id, UrchinConfig.tabLabels && !shownByStarfish(name))
             ?.let { insertAfterName(name, player.profile.name, it.formattedString) } ?: name
 
     @JvmStatic
@@ -41,7 +43,8 @@ object TagLabels {
     *///?} else {
     @JvmStatic
     fun tabName(player: PlayerInfo, name: Text): Text =
-        labelFor(player.profile.id(), UrchinConfig.tabLabels)?.let { insertAfterName(name, player.profile.name(), it) } ?: name
+        labelFor(player.profile.id(), UrchinConfig.tabLabels && !shownByStarfish(name.string))
+            ?.let { insertAfterName(name, player.profile.name(), it) } ?: name
 
     @JvmStatic
     fun nametag(player: Player, name: Text): Text =
@@ -67,6 +70,8 @@ object TagLabels {
         return if (inserted) labeled else text.copy().append(label)
     }
     //?}
+
+    private fun shownByStarfish(name: String): Boolean = StarfishPlugin.listening && containsTagBadge(name)
 
     private fun labelFor(player: UUID, enabled: Boolean): Text? =
         TaggedPlayers.topTag(player)?.takeIf { enabled && UrchinConfig.enabled }?.let(::label)
