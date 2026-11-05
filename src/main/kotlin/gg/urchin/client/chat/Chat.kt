@@ -1,6 +1,5 @@
 package gg.urchin.client.chat
 
-import gg.urchin.client.Game
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.JoinConfiguration
@@ -23,23 +22,21 @@ object Chat {
 
     private val ownPrefix = plainText(prefix)
 
-    fun send(message: ComponentLike) = display(Component.textOfChildren(prefix, message))
+    fun send(message: ComponentLike): ChatEntry = ChatHistory.add(prefixed(message))
 
-    fun info(message: String) = send(Component.text(message, NamedTextColor.GRAY))
+    fun replace(previous: ChatEntry?, message: ComponentLike): ChatEntry = ChatHistory.replace(previous, prefixed(message))
 
-    fun warning(message: String) = send(Component.text(message, NamedTextColor.YELLOW))
+    fun infoText(message: String): Component = Component.text(message, NamedTextColor.GRAY)
 
-    fun error(message: String) = send(Component.text(message, NamedTextColor.RED))
+    fun warningText(message: String): Component = Component.text(message, NamedTextColor.YELLOW)
+
+    fun errorText(message: String): Component = Component.text(message, NamedTextColor.RED)
 
     fun isOwn(message: Component): Boolean = plainText(message).startsWith(ownPrefix)
 
     private fun plainText(message: Component): String = Platform.i18n().getUnformattedText(message)
 
-    //? if = 1.8.9 {
-    /*private fun display(message: Component) = Game.thread.execute { ChatHistory.chat().addMessage(NativeText.toNative(message)) }
-    *///?} else {
-    private fun display(message: Component) = Platform.compatibility().displayChatMessage(message)
-    //?}
+    private fun prefixed(message: ComponentLike) = NativeText.toNative(Component.textOfChildren(prefix, message))
 }
 
 fun bracketed(label: String, color: TextColor): Component =

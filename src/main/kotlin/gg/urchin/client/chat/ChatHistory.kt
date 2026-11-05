@@ -11,10 +11,26 @@ import net.minecraft.client.multiplayer.chat.GuiMessage
 import net.minecraft.network.chat.Component as Text
 //?}
 
+//? if = 1.8.9 {
+/*typealias ChatEntry = ChatMessage
+*///?} else {
+typealias ChatEntry = GuiMessage
+//?}
+
 object ChatHistory {
+    fun add(content: Text): ChatEntry {
+        display(content)
+        return messages().first()
+    }
+
+    fun replace(previous: ChatEntry?, content: Text): ChatEntry {
+        if (previous != null && messages().removeIf { it === previous }) redraw()
+        return add(content)
+    }
+
     fun rewriteSince(since: Int, mentioning: Regex, rewrite: (Component) -> Component) {
         var rewrote = false
-        (chat() as ChatHistoryAccessor).`urchin$messages`().replaceAll { message ->
+        messages().replaceAll { message ->
             val content = contentOf(message)
             if (addedAt(message) < since || !mentioning.containsMatchIn(NativeText.searchableText(content))) return@replaceAll message
             val original = NativeText.toAdventure(content) ?: return@replaceAll message
@@ -26,10 +42,14 @@ object ChatHistory {
         if (rewrote) redraw()
     }
 
+    private fun messages(): MutableList<ChatEntry> = (chat() as ChatHistoryAccessor).`urchin$messages`()
+
     //? if = 1.8.9 {
     /*fun currentTick(): Int = Minecraft.getInstance().gui.ticks
 
     fun chat() = Minecraft.getInstance().gui.chat
+
+    private fun display(content: Text) = chat().addMessage(content)
 
     private fun redraw() = chat().reset()
 
@@ -43,6 +63,8 @@ object ChatHistory {
     fun currentTick(): Int = Minecraft.getInstance().gui.hud.guiTicks
 
     fun chat() = Minecraft.getInstance().gui.hud.chat
+
+    private fun display(content: Text) = chat().addClientSystemMessage(content)
 
     private fun redraw() = chat().rescaleChat()
 

@@ -7,6 +7,8 @@ import gg.urchin.api.TagType
 import gg.urchin.api.UrchinApi
 import gg.urchin.client.Game
 import gg.urchin.client.chat.Chat
+import gg.urchin.client.chat.ChatEntry
+import gg.urchin.client.chat.lines
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import java.util.concurrent.CompletableFuture
@@ -69,31 +71,29 @@ internal class TagRemoval(target: Target, private val tag: Tag) : PendingAction(
 
 object TagActions {
     private val pending = mutableMapOf<String, PendingAction>()
+    private val shown = mutableMapOf<String, ChatEntry>()
 
     fun check(names: List<String>) = names.forEach(::openPanel)
 
-    fun openPanel(name: String) {
-        Chat.info("Looking up $name...")
-        lookUp(name) { Chat.send(TagPanels.panel(it)) }
-    }
+    fun openPanel(name: String) = lookUp(name) { show(it.name, TagPanels.panel(it)) }
 
     fun tag(name: String, input: String, reason: String) {
         val type = TagType.byInput(input)
         when {
-            type == TagType.CONFIRMED_CHEATER -> Chat.error("Confirmed Cheater tags can only be applied through the review system.")
-            type == TagType.REPLAYS_NEEDED -> Chat.error("Replays Needed tags must be added through the Urchin bot (/watch).")
-            type == null || !type.addable -> unknownType(input)
-            reason.isBlank() -> Chat.warning("Add a reason: /urchin tag $name ${type.alias} <reason>")
+            type == TagType.CONFIRMED_CHEATER -> showError(name, "Confirmed Cheater tags can only be applied through the review system.")
+            type == TagType.REPLAYS_NEEDED -> showError(name, "Replays Needed tags must be added through the Urchin bot (/watch).")
+            type == null || !type.addable -> unknownType(name, input)
+            reason.isBlank() -> show(name, Chat.warningText("Add a reason: /urchin tag $name ${type.alias} <reason>"))
             else -> lookUp(name) { propose(it, type, reason.trim()) }
         }
     }
 
     fun untag(name: String, input: String) {
-        val type = TagType.byInput(input) ?: return unknownType(input)
+        val type = TagType.byInput(input) ?: return unknownType(name, input)
         lookUp(name) { target ->
             val tag = target.tags.firstOrNull { it.type == type }
             if (tag == null) {
-                Chat.error("${target.name} has no ${type.display} tag.")
+                showError(target.name, "${target.name} has no ${type.display} tag.")
             } else {
                 offer(TagRemoval(target, tag), TagPanels.removePrompt(target, tag))
             }
@@ -102,13 +102,13 @@ object TagActions {
 
     fun confirm(name: String) {
         val key = name.lowercase()
-        val action = pending.remove(key) ?: return Chat.error("That action expired. Reopen the panel with /urchin tag $name.")
+        val action = pending.remove(key) ?: return showError(name, "That action expired. Reopen the panel with /urchin $name.")
         action.perform().whenCompleteAsync({ _, error ->
             if (error != null) {
-                Chat.error(describe(error))
+                showError(name, describe(error))
             } else {
                 action.undo()?.let { pending[key] = it }
-                Chat.send(action.result())
+                show(name, action.result())
             }
         }, Game.thread)
     }
@@ -125,22 +125,36 @@ object TagActions {
 
     private fun offer(action: PendingAction, prompt: Component) {
         pending[action.target.name.lowercase()] = action
-        Chat.send(prompt)
+        show(action.target.name, prompt)
     }
 
-    private fun unknownType(input: String) {
-        Chat.error("Unknown tag type \"$input\".")
-        Chat.send(TagPanels.tagTypes())
-    }
+    private fun unknownType(name: String, input: String) =
+        show(name, lines(listOf(Chat.errorText("Unknown tag type \"$input\"."), TagPanels.tagTypes())))
 
     private fun lookUp(name: String, then: (Target) -> Unit) {
+        show(name, Chat.infoText("Looking up $name..."))
         UrchinApi.lookupPlayer(name).whenCompleteAsync({ player, error ->
             when {
-                error != null -> Chat.error(describe(error))
-                player == null -> Chat.error("Player not found: $name")
-                else -> then(Target(name, player))
+                error != null -> showError(name, describe(error))
+                player == null -> showError(name, "Player not found: $name")
+                else -> {
+                    val target = Target(name, player)
+                    moveShown(name, target.name)
+                    then(target)
+                }
             }
         }, Game.thread)
+    }
+
+    private fun show(name: String, message: Component) {
+        val key = name.lowercase()
+        shown[key] = Chat.replace(shown[key], message)
+    }
+
+    private fun showError(name: String, message: String) = show(name, Chat.errorText(message))
+
+    private fun moveShown(from: String, to: String) {
+        shown.remove(from.lowercase())?.let { shown[to.lowercase()] = it }
     }
 }
 

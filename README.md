@@ -5,7 +5,7 @@ Urchin blacklist integration for OneClient
 - Get a chat alert when a tagged player joins your game
 - See tags next to tagged players in the tab list, above their heads and in chat
 - Hover a tag to see why it was added, by who and when, and click it to paste the info in chat
-- Check anyone's tags with `/urchin check <player>`
+- Check anyone's tags with `/urchin <player>`
 - Add and remove tags with `/urchin tag` and `/urchin untag`
 
 Adding and removing tags needs your Minecraft account linked in the [Urchin Discord](https://discord.gg/urchin).

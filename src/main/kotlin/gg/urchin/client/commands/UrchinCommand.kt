@@ -15,12 +15,9 @@ import org.polyfrost.oneconfig.utils.v1.dsl.addDefaultCommand
 object UrchinCommand {
     fun register() = CommandManager.register(
         UrchinConfig.addDefaultCommand(UrchinConstants.ID)
-            .then(
-                literal("check").then(
-                    CommandManager.argument("players", greedyString())
-                        .runs { TagActions.check(getString(it, "players").split(' ').filter(String::isNotBlank)) },
-                ),
-            )
+            .requires { UrchinConfig.enabled }
+            .then(checkPlayers())
+            .then(literal("check").then(checkPlayers()))
             .then(
                 literal("tag").then(
                     CommandManager.argument("player", word())
@@ -50,6 +47,10 @@ object UrchinCommand {
             ),
     )
 }
+
+private fun checkPlayers() =
+    CommandManager.argument("players", greedyString())
+        .runs { TagActions.check(getString(it, "players").split(' ').filter(String::isNotBlank)) }
 
 private fun <S, T : ArgumentBuilder<S, T>> T.runs(action: (CommandContext<S>) -> Unit): T =
     executes { context ->
