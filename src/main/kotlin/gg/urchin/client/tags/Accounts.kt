@@ -32,7 +32,7 @@ private fun skinProfile(textures: String): SkinProfile? =
         null
     }
 
-private fun undashedUuid(hex: String): UUID? {
+internal fun undashedUuid(hex: String): UUID? {
     if (hex.length != UUID_HEX_LENGTH) return null
     val high = hex.substring(0, HALF_UUID_HEX_LENGTH).toULongOrNull(HEX_RADIX) ?: return null
     val low = hex.substring(HALF_UUID_HEX_LENGTH).toULongOrNull(HEX_RADIX) ?: return null

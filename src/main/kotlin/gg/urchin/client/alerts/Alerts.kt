@@ -25,7 +25,7 @@ object Alerts {
 private fun message(tagged: TaggedPlayer): Component {
     val name = tagged.player.name
     val line = Component.textOfChildren(
-        (tagged.displayName?.let(Component::text) ?: Component.text(name, NamedTextColor.WHITE))
+        shownName(tagged)
             .hoverEvent(Component.text("Click to copy name", NamedTextColor.DARK_GRAY))
             .suggesting(name),
         Component.space(),
@@ -34,6 +34,11 @@ private fun message(tagged: TaggedPlayer): Component {
     if (UrchinConfig.compactAlerts) return line
     return lines(listOf(line, SEPARATOR) + TagText.stacked(tagged.tags) { TagText.details(it, name) } + SEPARATOR)
 }
+
+private fun shownName(tagged: TaggedPlayer): Component =
+    Game.tabName(tagged.player.uuid)
+        ?: tagged.displayName?.let(Component::text)
+        ?: Component.text(tagged.player.name, NamedTextColor.WHITE)
 
 private fun ignored(tagged: TaggedPlayer, partyMembers: Set<UUID>): Boolean =
     (UrchinConfig.ignoreSelf && tagged.player.name.equals(MinecraftSession.username, ignoreCase = true)) ||

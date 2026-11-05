@@ -1,16 +1,23 @@
 package gg.urchin.client
 
 import com.mojang.authlib.GameProfile
+import gg.urchin.client.chat.NativeText
+import net.kyori.adventure.text.Component
 import net.minecraft.client.Minecraft
+import java.util.UUID
 import java.util.concurrent.Executor
 //? if = 1.8.9 {
 /*import net.minecraft.client.sound.instance.SimpleSoundInstance
 import net.minecraft.network.packet.s2c.play.PlayerInfoS2CPacket
 import net.minecraft.resource.Identifier
+import net.minecraft.scoreboard.team.Team
+import net.minecraft.text.LiteralText
 *///?} else {
 import net.minecraft.client.resources.sounds.SimpleSoundInstance
+import net.minecraft.network.chat.Component as Text
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket
 import net.minecraft.sounds.SoundEvents
+import net.minecraft.world.scores.PlayerTeam
 //?}
 
 private const val TEXTURES = "textures"
@@ -30,6 +37,17 @@ object Game {
         *///?} else {
         Minecraft.getInstance().soundManager.play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_PLING, 1f))
         //?}
+    }
+
+    fun tabName(uuid: UUID): Component? {
+        //? if = 1.8.9 {
+        /*val info = Minecraft.getInstance().networkHandler?.getOnlinePlayer(uuid) ?: return null
+        val name = info.displayName ?: LiteralText(Team.getMemberDisplayName(info.team, info.profile.name))
+        *///?} else {
+        val info = Minecraft.getInstance().connection?.getPlayerInfo(uuid) ?: return null
+        val name = info.tabListDisplayName ?: PlayerTeam.formatNameForTeam(info.team, Text.literal(info.profile.name()))
+        //?}
+        return NativeText.toAdventure(name)
     }
 
     fun playersAddedBy(packet: Any): List<ListedPlayer> =

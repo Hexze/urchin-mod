@@ -10,3 +10,4 @@
 - Each player's lookup, panel, prompt and result replace one another in chat instead of stacking up.
 - `/urchin tag <player> <type> <reason>` and `/urchin untag <player> <type>` ask for confirmation, and new tags can be undone.
 - Settings in OneConfig, opened with `/urchin` or from the mod's card, whose toggle turns the mod and its commands on or off.
+- Alerts and panels show a player's name as the tab list formats it while they're in the lobby.

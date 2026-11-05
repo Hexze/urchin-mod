@@ -9,6 +9,7 @@ import gg.urchin.client.Game
 import gg.urchin.client.chat.Chat
 import gg.urchin.client.chat.ChatEntry
 import gg.urchin.client.chat.lines
+import gg.urchin.client.tags.undashedUuid
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import java.util.concurrent.CompletableFuture
@@ -33,7 +34,9 @@ internal class Target(input: String, player: PlayerTags) {
     val uuid = player.uuid
     val tags = player.tags
     val name = player.displayName?.let(::plainName) ?: input
-    val display: Component = player.displayName?.let(Component::text) ?: Component.text(name, NamedTextColor.GRAY)
+    val display: Component = undashedUuid(player.uuid.replace("-", ""))?.let(Game::tabName)
+        ?: player.displayName?.let(Component::text)
+        ?: Component.text(name, NamedTextColor.GRAY)
 }
 
 internal sealed class PendingAction(val target: Target) {
