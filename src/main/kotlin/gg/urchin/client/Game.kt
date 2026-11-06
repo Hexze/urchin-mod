@@ -39,13 +39,13 @@ object Game {
         //?}
     }
 
-    fun tabName(uuid: UUID): Component? {
+    fun teamName(uuid: UUID): Component? {
         //? if = 1.8.9 {
         /*val info = Minecraft.getInstance().networkHandler?.getOnlinePlayer(uuid) ?: return null
-        val name = info.displayName ?: LiteralText(Team.getMemberDisplayName(info.team, info.profile.name))
+        val name = LiteralText(Team.getMemberDisplayName(info.team ?: return null, info.profile.name))
         *///?} else {
         val info = Minecraft.getInstance().connection?.getPlayerInfo(uuid) ?: return null
-        val name = info.tabListDisplayName ?: PlayerTeam.formatNameForTeam(info.team, Text.literal(info.profile.name()))
+        val name = PlayerTeam.formatNameForTeam(info.team ?: return null, Text.literal(info.profile.name()))
         //?}
         return NativeText.toAdventure(name)
     }

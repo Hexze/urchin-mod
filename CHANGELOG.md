@@ -11,7 +11,7 @@
 - `/urchin tag <player> <type> <reason>` and `/urchin untag <player> <type>` ask for confirmation, and new tags can be undone.
 - Settings in OneConfig, opened with `/urchin` or from the mod's card, whose toggle turns the mod and its commands on or off.
 - Nicked players wearing their own skin are looked up by that skin's account; their tags show next to the nick, and alerts add their real name in parentheses.
-- Alerts and panels show a player's name as the tab list formats it while they're in the lobby.
+- Alerts and panels show a player's name as their team formats it while they're in the lobby.
 - Hypixel replays look up and alert the recorded players by the account in their skin.
 - While Starfish's Urchin plugin is running, chat and tab labels skip names it has already badged, so its Bedwars tab tags show without doubling up.
 - Works alongside Starfish's Urchin plugin on 1.8.9: the plugin turns off the alerts and labels the mod is showing, and works as usual without the mod.

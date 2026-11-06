@@ -34,7 +34,7 @@ internal class Target(input: String, player: PlayerTags) {
     val uuid = player.uuid
     val tags = player.tags
     val name = player.displayName?.let(::plainName) ?: input
-    val display: Component = undashedUuid(player.uuid.replace("-", ""))?.let(Game::tabName)
+    val display: Component = undashedUuid(player.uuid.replace("-", ""))?.let(Game::teamName)
         ?: player.displayName?.let(Component::text)
         ?: Component.text(name, NamedTextColor.GRAY)
 }
