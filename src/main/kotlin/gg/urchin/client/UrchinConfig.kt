@@ -1,6 +1,7 @@
 package gg.urchin.client
 
 import gg.urchin.UrchinConstants
+import gg.urchin.client.settings.SettingsStore
 import org.polyfrost.oneconfig.api.config.v1.KtConfig
 import org.polyfrost.oneconfig.api.platform.v1.DesktopHelper
 import java.net.URI
@@ -72,6 +73,13 @@ object UrchinConfig : KtConfig(
         subcategory = LABELS,
     )
 
+    var tagIcons by switch(
+        name = "MDI Icons",
+        def = false,
+        description = "Show tags as Material Design icons instead of letters like [CCC], in chat, the tab list and nametags.",
+        subcategory = LABELS,
+    )
+
     var ignoreSelf by switch(
         name = "Ignore Yourself",
         def = true,
@@ -104,4 +112,19 @@ object UrchinConfig : KtConfig(
         addAliases(*arrayOf("blacklist", "tags"))
         disableAllUnless(::enabled.name)
     }
+}
+
+/** Exposes the OneConfig page as the mod's [SettingsStore]. OneConfig saves the values itself. */
+object OneConfigSettings : SettingsStore {
+    override var enabled by UrchinConfig::enabled
+    override var alerts by UrchinConfig::alerts
+    override var alertSound by UrchinConfig::alertSound
+    override var alertDelay by UrchinConfig::alertDelay
+    override var compactAlerts by UrchinConfig::compactAlerts
+    override var tabLabels by UrchinConfig::tabLabels
+    override var nametagLabels by UrchinConfig::nametagLabels
+    override var chatLabels by UrchinConfig::chatLabels
+    override var tagIcons by UrchinConfig::tagIcons
+    override var ignoreSelf by UrchinConfig::ignoreSelf
+    override var ignoreParty by UrchinConfig::ignoreParty
 }

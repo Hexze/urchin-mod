@@ -50,6 +50,16 @@ object Game {
         return NativeText.toAdventure(name)
     }
 
+    // Whether the server being played on is Hypixel, by its address. Only the 1.8.9 build needs it: it is the
+    // fallback for when Hypixel's location packet does not arrive.
+    fun onHypixel(): Boolean =
+        //? if = 1.8.9 {
+        /*Minecraft.getInstance().currentServerEntry?.ip?.substringBefore(':')?.lowercase()
+            ?.let { it == "hypixel.net" || it.endsWith(".hypixel.net") } == true
+        *///?} else {
+        false
+        //?}
+
     fun playersAddedBy(packet: Any): List<ListedPlayer> =
         //? if = 1.8.9 {
         /*(packet as? PlayerInfoS2CPacket)

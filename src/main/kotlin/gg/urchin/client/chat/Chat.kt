@@ -7,6 +7,8 @@ import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+//? if > 1.8.9
 import org.polyfrost.oneconfig.api.platform.v1.Platform
 
 private const val SEPARATOR_WIDTH = 37
@@ -34,7 +36,7 @@ object Chat {
 
     fun isOwn(message: Component): Boolean = plainText(message).startsWith(ownPrefix)
 
-    private fun plainText(message: Component): String = Platform.i18n().getUnformattedText(message)
+    private fun plainText(message: Component): String = PlainTextComponentSerializer.plainText().serialize(message)
 
     private fun prefixed(message: ComponentLike) = NativeText.toNative(Component.textOfChildren(prefix, message))
 }

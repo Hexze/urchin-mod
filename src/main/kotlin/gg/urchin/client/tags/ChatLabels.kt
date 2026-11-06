@@ -1,7 +1,7 @@
 package gg.urchin.client.tags
 
 import gg.urchin.client.StarfishPlugin
-import gg.urchin.client.UrchinConfig
+import gg.urchin.client.settings.Settings
 import gg.urchin.client.chat.Chat
 import gg.urchin.client.chat.ChatHistory
 import gg.urchin.client.chat.TagText
@@ -52,7 +52,7 @@ object ChatLabels {
         ChatHistory.rewriteSince(since, pattern) { labeled(it, pattern) }
     }
 
-    private fun shown(): Boolean = UrchinConfig.enabled && UrchinConfig.chatLabels
+    private fun shown(): Boolean = Settings.enabled && Settings.chatLabels
 
     private fun taggedNamePattern(): Regex? =
         TaggedPlayers.names.takeIf { shown() && it.isNotEmpty() }?.let(::namePattern)
@@ -121,7 +121,7 @@ private fun splitAfterNames(text: String, names: List<MatchResult>, badges: (Str
     for (name in names) {
         val end = name.range.last + 1
         pieces += textFrom(text, start, end)
-        pieces += Component.space()
+        pieces += TagText.gap()
         pieces += badges(name.value)
         start = end
     }

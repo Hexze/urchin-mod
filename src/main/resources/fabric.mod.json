@@ -3,7 +3,7 @@
     "id": "${mod_id}",
     "version": "${mod_version}",
     "name": "${mod_name}",
-    "description": "Urchin blacklist tags for Hypixel.",
+    "description": "Urchin blacklist tags for Hypixel. Uses OneConfig when installed (OneClient); otherwise it uses its own settings screen (/urchin).",
     "authors": [
         "Hexze"
     ],
@@ -21,12 +21,19 @@
         ]
     },
     "mixins": [
-        "${mod_id}.mixins.json"
+        "${mod_id}.mixins.json",
+        "${mod_id}.standalone.mixins.json"
     ],
     "depends": {
         "fabricloader": ">=${loader_version}",
         "minecraft": "${minecraft_version_range}",
-        "oneconfigv1": ">=${oneconfig_version}",
-        "fabric-language-kotlin": ">=1.14.1+kotlin.2.4.20"
+        "fabric-language-kotlin": ">=1.14.1+kotlin.2.4.20",
+        "${required_id}": "${required_range}"
+    },
+    "suggests": {
+        "oneconfigv1": ">=${oneconfig_version}"
+    },
+    "breaks": {
+        "oneconfigv1": "<${oneconfig_version}"
     }
 }
