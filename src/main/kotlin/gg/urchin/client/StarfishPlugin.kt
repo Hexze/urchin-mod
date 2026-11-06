@@ -34,7 +34,7 @@ object StarfishPlugin {
                 UNLOAD_CHANNEL -> Game.thread.execute { listenTo(false) }
             }
         }
-        listOf(UrchinConfig::enabled, UrchinConfig::alerts, UrchinConfig::tabLabels, UrchinConfig::nametagLabels).forEach {
+        listOf(UrchinConfig::enabled, UrchinConfig::alertsFor, UrchinConfig::tabLabelsFor, UrchinConfig::nametagLabelsFor).forEach {
             UrchinConfig.addCallback(it) {
                 reportChanges()
                 false
@@ -63,9 +63,9 @@ private fun handledFeatures(): List<String> =
         emptyList()
     } else {
         listOfNotNull(
-            "alerts".takeIf { UrchinConfig.alerts },
-            "tab".takeIf { UrchinConfig.tabLabels },
-            "nametags".takeIf { UrchinConfig.nametagLabels },
+            "alerts".takeIf { UrchinConfig.alertsFor != Audience.NOBODY },
+            "tab".takeIf { UrchinConfig.tabLabelsFor != Audience.NOBODY },
+            "nametags".takeIf { UrchinConfig.nametagLabelsFor != Audience.NOBODY },
         )
     }
 *///?} else {

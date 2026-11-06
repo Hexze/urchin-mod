@@ -7,7 +7,6 @@ import java.net.URI
 
 private const val ALERTS = "Alerts"
 private const val LABELS = "Labels"
-private const val FILTERS = "Filters"
 private const val ACCOUNT = "Account"
 private val DISCORD_INVITE = URI("https://discord.gg/urchin")
 
@@ -19,10 +18,10 @@ object UrchinConfig : KtConfig(
 ) {
     var enabled by masterToggle()
 
-    var alerts by switch(
-        name = "Enabled",
-        def = true,
-        description = "Send a chat alert when a tagged player joins your game.",
+    var alertsFor by audience(
+        name = "Alert For",
+        def = Audience.EVERYONE_BUT_ME,
+        description = "Who sends a chat alert when they join your game tagged.",
         subcategory = ALERTS,
     )
 
@@ -51,39 +50,25 @@ object UrchinConfig : KtConfig(
         subcategory = ALERTS,
     )
 
-    var tabLabels by switch(
+    var tabLabelsFor by audience(
         name = "Tab List",
-        def = true,
-        description = "Show each tagged player's tag next to their name in the tab list.",
+        def = Audience.EVERYONE,
+        description = "Whose tag shows next to their name in the tab list.",
         subcategory = LABELS,
     )
 
-    var nametagLabels by switch(
+    var nametagLabelsFor by audience(
         name = "Nametags",
-        def = true,
-        description = "Show each tagged player's tag next to the name above their head.",
+        def = Audience.EVERYONE,
+        description = "Whose tag shows next to the name above their head.",
         subcategory = LABELS,
     )
 
-    var chatLabels by switch(
+    var chatLabelsFor by audience(
         name = "Chat",
-        def = true,
-        description = "Show tags next to tagged players' names in chat. Hover a tag for the details.",
+        def = Audience.EVERYONE,
+        description = "Whose tags show next to their name in chat. Hover a tag for the details.",
         subcategory = LABELS,
-    )
-
-    var ignoreSelf by switch(
-        name = "Ignore Yourself",
-        def = true,
-        description = "Skip alerts for your own tags. Your labels still show.",
-        subcategory = FILTERS,
-    )
-
-    var ignoreParty by switch(
-        name = "Ignore Your Party",
-        def = false,
-        description = "Skip alerts for players in your Hypixel party. Their labels still show.",
-        subcategory = FILTERS,
     )
 
     val limitedAccess by info(
@@ -104,4 +89,16 @@ object UrchinConfig : KtConfig(
         addAliases(*arrayOf("blacklist", "tags"))
         disableAllUnless(::enabled.name)
     }
+
+    val audiences: List<Audience>
+        get() = listOf(alertsFor, tabLabelsFor, nametagLabelsFor, chatLabelsFor)
+
+    private fun audience(name: String, def: Audience, description: String, subcategory: String) = dropdown(
+        name = name,
+        defaultOption = def,
+        options = Audience.entries.toTypedArray(),
+        description = description,
+        subcategory = subcategory,
+        stringTransformer = Audience::label,
+    )
 }

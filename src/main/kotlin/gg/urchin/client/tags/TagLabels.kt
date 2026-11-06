@@ -1,6 +1,7 @@
 package gg.urchin.client.tags
 
 import gg.urchin.api.TagType
+import gg.urchin.client.Audience
 import gg.urchin.client.StarfishPlugin
 import gg.urchin.client.UrchinConfig
 import gg.urchin.client.chat.containsTagBadge
@@ -31,24 +32,26 @@ object TagLabels {
     //? if = 1.8.9 {
     /*@JvmStatic
     fun tabName(player: PlayerInfo, name: String): String =
-        labelFor(player.profile.id, UrchinConfig.tabLabels && !shownByStarfish(name))
+        labelFor(player.profile.id, UrchinConfig.tabLabelsFor)
+            ?.takeUnless { shownByStarfish(name) }
             ?.let { insertAfterName(name, player.profile.name, it.formattedString) } ?: name
 
     @JvmStatic
     fun nametag(player: Player, name: Text): Text =
-        labelFor(player.uuid, UrchinConfig.nametagLabels)
+        labelFor(player.uuid, UrchinConfig.nametagLabelsFor)
             ?.let { LiteralText(insertAfterName(name.formattedString, player.gameProfile.name, it.formattedString)) } ?: name
 
     private fun colored(text: String, color: Formatting): Text = LiteralText(text).setStyle(Style().setColor(color))
     *///?} else {
     @JvmStatic
     fun tabName(player: PlayerInfo, name: Text): Text =
-        labelFor(player.profile.id(), UrchinConfig.tabLabels && !shownByStarfish(name.string))
+        labelFor(player.profile.id(), UrchinConfig.tabLabelsFor)
+            ?.takeUnless { shownByStarfish(name.string) }
             ?.let { insertAfterName(name, player.profile.name(), it) } ?: name
 
     @JvmStatic
     fun nametag(player: Player, name: Text): Text =
-        labelFor(player.uuid, UrchinConfig.nametagLabels)?.let { insertAfterName(name, player.gameProfile.name(), it) } ?: name
+        labelFor(player.uuid, UrchinConfig.nametagLabelsFor)?.let { insertAfterName(name, player.gameProfile.name(), it) } ?: name
 
     private fun colored(text: String, color: Formatting): MutableComponent = Text.literal(text).withStyle(color)
 
@@ -73,8 +76,8 @@ object TagLabels {
 
     private fun shownByStarfish(name: String): Boolean = StarfishPlugin.listening && containsTagBadge(name)
 
-    private fun labelFor(player: UUID, enabled: Boolean): Text? =
-        TaggedPlayers.topTag(player)?.takeIf { enabled && UrchinConfig.enabled }?.let(::label)
+    private fun labelFor(player: UUID, audience: Audience): Text? =
+        TaggedPlayers.topTagFor(player, audience)?.takeIf { UrchinConfig.enabled }?.let(::label)
 
     private fun label(type: TagType): Text =
         colored(" [", Formatting.DARK_GRAY)

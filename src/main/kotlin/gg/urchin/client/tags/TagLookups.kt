@@ -2,6 +2,7 @@ package gg.urchin.client.tags
 
 import gg.urchin.api.TagBatch
 import gg.urchin.api.UrchinApi
+import gg.urchin.client.Audience
 import gg.urchin.client.Game
 import gg.urchin.client.ListedPlayer
 import gg.urchin.client.TaggedPlayer
@@ -42,7 +43,7 @@ object TagLookups {
             located = true
             inGame = location.lobbyName.isEmpty && location.mode.isPresent
             inReplay = location.serverType.orElse(null) == GameType.REPLAY
-            if (inGame && !inReplay && UrchinConfig.ignoreParty) party = Party.members()
+            if (!inReplay && Audience.EVERYONE_BUT_MY_PARTY in UrchinConfig.audiences) party = Party.refresh()
             lookUpListed()
         }
 
@@ -77,9 +78,9 @@ object TagLookups {
         }
 
         private fun alert(tagged: List<TaggedPlayer>) {
-            if (!inGame || !UrchinConfig.alerts) return
-            party.thenAcceptAsync(
-                { members -> if (this === visit) Alerts.show(tagged, members) },
+            if (!inGame || UrchinConfig.alertsFor == Audience.NOBODY) return
+            party.thenRunAsync(
+                { if (this === visit) Alerts.show(tagged) },
                 CompletableFuture.delayedExecutor(UrchinConfig.alertDelay.toLong(), TimeUnit.MILLISECONDS, Game.thread),
             )
         }
@@ -104,7 +105,7 @@ object TagLookups {
 private fun List<Lookup>.tagged(batch: TagBatch): List<TaggedPlayer> =
     mapNotNull { (player, account) ->
         val uuid = account.undashed()
-        batch.players[uuid]?.takeIf { it.isNotEmpty() }?.let { TaggedPlayer(player, it, batch.displayNames[uuid]) }
+        batch.players[uuid]?.takeIf { it.isNotEmpty() }?.let { TaggedPlayer(player, account, it, batch.displayNames[uuid]) }
     }
 
 private fun UUID.undashed(): String = toString().replace("-", "")

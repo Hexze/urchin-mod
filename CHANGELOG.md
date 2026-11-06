@@ -3,7 +3,8 @@
 ## 0.1.0
 
 - Sign in to the Urchin API with the player's Minecraft account.
-- Chat alerts for tagged players when joining a Hypixel game, with sound, delay, compact, ignore-yourself and ignore-your-party settings.
+- Chat alerts for tagged players when joining a Hypixel game, with sound, delay and compact settings.
+- Alerts and tab, nametag and chat labels each choose who they cover: everyone, everyone but you, everyone but your party, or nobody.
 - Every tag shown in chat has a hover card with its details; clicking it pastes a summary into the chat box.
 - The Urchin logo in the mod list and OneConfig, and an Urchin gradient chat prefix.
 - `/urchin <players>` shows each player's tags with buttons to add or remove them; `/urchin check <players>` does the same for players named like a subcommand.

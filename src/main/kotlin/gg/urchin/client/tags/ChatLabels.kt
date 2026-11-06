@@ -1,5 +1,6 @@
 package gg.urchin.client.tags
 
+import gg.urchin.client.Audience
 import gg.urchin.client.StarfishPlugin
 import gg.urchin.client.UrchinConfig
 import gg.urchin.client.chat.Chat
@@ -47,15 +48,16 @@ object ChatLabels {
     //?}
 
     fun labelEarlier(names: Collection<String>, since: Int) {
-        if (!shown()) return
-        val pattern = namePattern(names)
+        val shownNames = names.intersect(shownNames())
+        if (shownNames.isEmpty()) return
+        val pattern = namePattern(shownNames)
         ChatHistory.rewriteSince(since, pattern) { labeled(it, pattern) }
     }
 
-    private fun shown(): Boolean = UrchinConfig.enabled && UrchinConfig.chatLabels
+    private fun shownNames(): Set<String> =
+        if (UrchinConfig.enabled) TaggedPlayers.namesFor(UrchinConfig.chatLabelsFor) else emptySet()
 
-    private fun taggedNamePattern(): Regex? =
-        TaggedPlayers.names.takeIf { shown() && it.isNotEmpty() }?.let(::namePattern)
+    private fun taggedNamePattern(): Regex? = shownNames().takeIf { it.isNotEmpty() }?.let(::namePattern)
 
     private fun labeled(message: Component, names: Regex): Component {
         if (Chat.isOwn(message)) return message

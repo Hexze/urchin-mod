@@ -1,6 +1,5 @@
 package gg.urchin.client.alerts
 
-import gg.urchin.api.MinecraftSession
 import gg.urchin.client.Game
 import gg.urchin.client.TaggedPlayer
 import gg.urchin.client.UrchinConfig
@@ -12,11 +11,10 @@ import gg.urchin.client.tags.isLiveNick
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.format.NamedTextColor
-import java.util.UUID
 
 object Alerts {
-    fun show(tagged: List<TaggedPlayer>, partyMembers: Set<UUID>) {
-        val alerted = tagged.filterNot { ignored(it, partyMembers) }
+    fun show(tagged: List<TaggedPlayer>) {
+        val alerted = tagged.filter { UrchinConfig.alertsFor.includes(it.account) }
         if (alerted.isEmpty()) return
         alerted.forEach { Chat.send(message(it)) }
         if (UrchinConfig.alertSound) Game.playAlertSound()
@@ -45,7 +43,3 @@ private fun shownName(tagged: TaggedPlayer): Component {
     if (real == null) return nick
     return Component.textOfChildren(nick, Component.text(" (", NamedTextColor.GRAY), real, Component.text(")", NamedTextColor.GRAY))
 }
-
-private fun ignored(tagged: TaggedPlayer, partyMembers: Set<UUID>): Boolean =
-    (UrchinConfig.ignoreSelf && tagged.player.name.equals(MinecraftSession.username, ignoreCase = true)) ||
-        (UrchinConfig.ignoreParty && tagged.player.uuid in partyMembers)

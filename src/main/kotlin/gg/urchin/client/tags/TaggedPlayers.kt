@@ -2,28 +2,29 @@ package gg.urchin.client.tags
 
 import gg.urchin.api.Tag
 import gg.urchin.api.TagType
+import gg.urchin.client.Audience
 import gg.urchin.client.TaggedPlayer
 import java.util.UUID
 
 object TaggedPlayers {
-    private val tagsByUuid = mutableMapOf<UUID, List<Tag>>()
-    private val tagsByName = mutableMapOf<String, List<Tag>>()
-
-    val names: Set<String>
-        get() = tagsByName.keys
+    private val byUuid = mutableMapOf<UUID, TaggedPlayer>()
+    private val byName = mutableMapOf<String, TaggedPlayer>()
 
     fun add(tagged: List<TaggedPlayer>) =
-        tagged.forEach { (player, tags) ->
-            tagsByUuid[player.uuid] = tags
-            tagsByName[player.name] = tags
+        tagged.forEach {
+            byUuid[it.player.uuid] = it
+            byName[it.player.name] = it
         }
 
     fun clear() {
-        tagsByUuid.clear()
-        tagsByName.clear()
+        byUuid.clear()
+        byName.clear()
     }
 
-    fun topTag(uuid: UUID): TagType? = tagsByUuid[uuid]?.map { it.type }?.minByOrNull { it.priority }
+    fun namesFor(audience: Audience): Set<String> = byName.filterValues { audience.includes(it.account) }.keys
 
-    fun tagsNamed(name: String): List<Tag> = tagsByName[name].orEmpty()
+    fun topTagFor(uuid: UUID, audience: Audience): TagType? =
+        byUuid[uuid]?.takeIf { audience.includes(it.account) }?.tags?.map { it.type }?.minByOrNull { it.priority }
+
+    fun tagsNamed(name: String): List<Tag> = byName[name]?.tags.orEmpty()
 }
