@@ -2,7 +2,7 @@ package gg.urchin.client.commands
 
 import gg.urchin.api.Tag
 import gg.urchin.api.TagType
-import gg.urchin.client.chat.SEPARATOR
+import gg.urchin.client.chat.Framed
 import gg.urchin.client.chat.TagText
 import gg.urchin.client.chat.bracketed
 import gg.urchin.client.chat.lines
@@ -15,27 +15,18 @@ import net.kyori.adventure.text.format.NamedTextColor
 private val UUID_PARTS = Regex("(.{8})(.{4})(.{4})(.{4})(.{12})")
 
 internal object TagPanels {
-    fun panel(target: Target): Component = lines(
-        listOf(
-            Component.empty(),
-            SEPARATOR,
-            Component.textOfChildren(header(target), Component.space(), *TagText.badges(target.tags, target.name).toTypedArray()),
-            SEPARATOR,
-        ) +
-            tagList(target) +
-            listOf(Component.empty(), addButtons(target), SEPARATOR),
-    )
+    fun panel(target: Target): Framed = Framed(ign(target), tagList(target), addButtons(target))
 
-    fun addPrompt(target: Target, proposed: Tag): Component = prompt(
-        Component.text("Add Tag", NamedTextColor.GREEN),
+    fun addPrompt(target: Target, proposed: Tag): Framed = prompt(
+        "Add Tag",
         target,
         TagText.proposedDetails(proposed),
         "Proceed?",
         confirmButton(target, NamedTextColor.GREEN, tagAction("Add the ", proposed.type, NamedTextColor.GREEN)),
     )
 
-    fun overwritePrompt(target: Target, current: Tag, replacement: Tag): Component = prompt(
-        Component.text("Overwrite Tag", NamedTextColor.GOLD),
+    fun overwritePrompt(target: Target, current: Tag, replacement: Tag): Framed = prompt(
+        "Overwrite Tag",
         target,
         listOf(Component.text("Current", NamedTextColor.DARK_GRAY)) + TagText.details(current, target.name),
         "This player already has an incompatible tag. Proceed and overwrite with yours?",
@@ -46,8 +37,8 @@ internal object TagPanels {
         ),
     )
 
-    fun removePrompt(target: Target, tag: Tag): Component = prompt(
-        Component.text("Remove Tag", NamedTextColor.RED),
+    fun removePrompt(target: Target, tag: Tag): Framed = prompt(
+        "Remove Tag",
         target,
         TagText.details(tag, target.name),
         "Remove?",
@@ -139,17 +130,14 @@ internal object TagPanels {
         }.toTypedArray(),
     )
 
-    private fun prompt(title: Component, target: Target, body: List<Component>, question: String, confirm: Component): Component =
-        lines(
-            listOf(
-                Component.empty(),
-                title,
-                SEPARATOR,
-                Component.textOfChildren(Component.text("IGN - ", NamedTextColor.GRAY), target.display),
-            ) +
-                body +
-                listOf(SEPARATOR, Component.text(question, NamedTextColor.GRAY), confirm),
+    private fun prompt(title: String, target: Target, body: List<Component>, question: String, confirm: Component): Framed =
+        Framed(
+            Component.text(title, NamedTextColor.WHITE),
+            listOf(ign(target)) + body,
+            Component.textOfChildren(Component.text("$question ", NamedTextColor.GRAY), confirm),
         )
+
+    private fun ign(target: Target): Component = Component.textOfChildren(Component.text("IGN - ", NamedTextColor.GRAY), header(target))
 
     private fun confirmButton(target: Target, color: NamedTextColor, hover: Component): Component =
         bracketed("Yes", color).hoverEvent(hover).running("/urchin confirm ${target.name}")

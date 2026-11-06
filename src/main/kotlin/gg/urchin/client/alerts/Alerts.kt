@@ -5,12 +5,12 @@ import gg.urchin.client.Game
 import gg.urchin.client.TaggedPlayer
 import gg.urchin.client.UrchinConfig
 import gg.urchin.client.chat.Chat
-import gg.urchin.client.chat.SEPARATOR
 import gg.urchin.client.chat.TagText
-import gg.urchin.client.chat.lines
+import gg.urchin.client.chat.Framed
 import gg.urchin.client.chat.suggesting
 import gg.urchin.client.tags.isLiveNick
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.format.NamedTextColor
 import java.util.UUID
 
@@ -23,7 +23,7 @@ object Alerts {
     }
 }
 
-private fun message(tagged: TaggedPlayer): Component {
+private fun message(tagged: TaggedPlayer): ComponentLike {
     val name = tagged.player.name
     val line = Component.textOfChildren(
         shownName(tagged)
@@ -33,7 +33,7 @@ private fun message(tagged: TaggedPlayer): Component {
         *TagText.badges(tagged.tags, name).toTypedArray(),
     )
     if (UrchinConfig.compactAlerts) return line
-    return lines(listOf(line, SEPARATOR) + TagText.stacked(tagged.tags) { TagText.details(it, name) } + SEPARATOR)
+    return Framed(line, TagText.stacked(tagged.tags) { TagText.details(it, name) })
 }
 
 private fun shownName(tagged: TaggedPlayer): Component {

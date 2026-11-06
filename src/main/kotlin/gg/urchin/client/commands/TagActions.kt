@@ -8,9 +8,9 @@ import gg.urchin.api.UrchinApi
 import gg.urchin.client.Game
 import gg.urchin.client.chat.Chat
 import gg.urchin.client.chat.ChatEntry
-import gg.urchin.client.chat.lines
 import gg.urchin.client.tags.undashedUuid
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.format.NamedTextColor
 import java.util.concurrent.CompletableFuture
 
@@ -126,13 +126,13 @@ object TagActions {
         }
     }
 
-    private fun offer(action: PendingAction, prompt: Component) {
+    private fun offer(action: PendingAction, prompt: ComponentLike) {
         pending[action.target.name.lowercase()] = action
         show(action.target.name, prompt)
     }
 
     private fun unknownType(name: String, input: String) =
-        show(name, lines(listOf(Chat.errorText("Unknown tag type \"$input\"."), TagPanels.tagTypes())))
+        show(name, Component.textOfChildren(Chat.errorText("Unknown tag type \"$input\". "), TagPanels.tagTypes()))
 
     private fun lookUp(name: String, then: (Target) -> Unit) {
         show(name, Chat.infoText("Looking up $name..."))
@@ -149,7 +149,7 @@ object TagActions {
         }, Game.thread)
     }
 
-    private fun show(name: String, message: Component) {
+    private fun show(name: String, message: ComponentLike) {
         val key = name.lowercase()
         shown[key] = Chat.replace(shown[key], message)
     }

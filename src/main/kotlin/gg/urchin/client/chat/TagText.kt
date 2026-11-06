@@ -26,7 +26,7 @@ object TagText {
 
     fun details(tag: Tag, name: String): List<Component> = listOf(labeled(tag, name)) + facts(tag)
 
-    fun proposedDetails(tag: Tag): List<Component> = listOf(title(tag.type).hoverEvent(lines(card(listOf(tag))))) + facts(tag)
+    fun proposedDetails(tag: Tag): List<Component> = listOf(title(tag.type).hoverEvent(card(listOf(tag)))) + facts(tag)
 
     fun hoverDetails(tag: Tag): List<Component> = listOf(title(tag.type)) + facts(tag)
 
@@ -51,13 +51,10 @@ object TagText {
         tag.expiresAt?.let { Component.text("- ${expiry(it)}", NamedTextColor.DARK_GRAY) },
     )
 
-    private fun hover(tags: List<Tag>): Component =
-        lines(card(tags) + Component.text("Click to paste info in chat", NamedTextColor.DARK_GRAY))
+    private fun hover(tags: List<Tag>): Component = card(tags, Component.text("Click to paste info in chat", NamedTextColor.DARK_GRAY))
 
-    private fun card(tags: List<Tag>): List<Component> =
-        listOf(Component.textOfChildren(UrchinLogo.component, Component.text(" Urchin Blacklist Tags", NamedTextColor.WHITE)), SEPARATOR) +
-            stacked(tags, ::hoverDetails) +
-            SEPARATOR
+    private fun card(tags: List<Tag>, footer: Component? = null): Component =
+        Framed(Component.text("Urchin Tags", NamedTextColor.WHITE), stacked(tags, ::hoverDetails), footer).asComponent()
 
     private fun Component.withInfo(hover: Component, name: String, tag: Tag): Component =
         hoverEvent(hover).suggesting(pasteLine(name, tag))
