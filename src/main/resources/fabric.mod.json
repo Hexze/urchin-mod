@@ -28,5 +28,10 @@
         "minecraft": "${minecraft_version_range}",
         "oneconfigv1": ">=${oneconfig_version}",
         "fabric-language-kotlin": ">=1.14.1+kotlin.2.4.20"
+    },
+    "custom": {
+        "sarcio:disable": [
+            "mem.alloc.render.LivingEntityRendererMixin"
+        ]
     }
 }
