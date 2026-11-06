@@ -14,7 +14,7 @@ import org.apache.logging.log4j.LogManager
 import org.polyfrost.oneconfig.api.event.v1.eventHandler
 import org.polyfrost.oneconfig.api.event.v1.events.HypixelLocationEvent
 import org.polyfrost.oneconfig.api.event.v1.events.PacketEvent
-import org.polyfrost.oneconfig.api.event.v1.events.WorldEvent
+import org.polyfrost.oneconfig.api.event.v1.events.ServerJoinEvent
 import org.polyfrost.oneconfig.api.hypixel.v1.HypixelUtils
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
@@ -89,7 +89,7 @@ object TagLookups {
 
     fun register() {
         Party.register()
-        eventHandler { _: WorldEvent.Load ->
+        eventHandler { _: ServerJoinEvent ->
             visit = Visit()
             TaggedPlayers.clear()
         }
