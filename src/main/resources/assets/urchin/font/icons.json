@@ -5,7 +5,60 @@
             "file": "urchin:font/logo.png",
             "height": 9,
             "ascent": 8,
-            "chars": [""]
+            "chars": [
+                ""
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "urchin:tags/alert-decagram-outline.png",
+            "height": 9,
+            "ascent": 8,
+            "chars": [
+                ""
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "urchin:tags/alert-octagram-outline.png",
+            "height": 9,
+            "ascent": 8,
+            "chars": [
+                ""
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "urchin:tags/alert-decagram.png",
+            "height": 9,
+            "ascent": 8,
+            "chars": [
+                ""
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "urchin:tags/alert-rhombus-outline.png",
+            "height": 9,
+            "ascent": 8,
+            "chars": [
+                ""
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "urchin:tags/archive-alert-outline.png",
+            "height": 9,
+            "ascent": 8,
+            "chars": [
+                ""
+            ]
+        },
+        {
+            "type": "space",
+            "advances": {
+                "": 2
+            }
         }
     ]
 }

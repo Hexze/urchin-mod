@@ -40,6 +40,7 @@ object UrchinCommand {
                     ),
                 ),
             )
+            .then(literal("debug").runs { Debug.report() })
             .then(
                 literal("confirm").then(
                     CommandManager.argument("player", word()).runs { TagActions.confirm(getString(it, "player")) },

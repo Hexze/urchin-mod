@@ -13,8 +13,9 @@
         //"PlayerEntityMixin",
         //? if = 1.8.9
         //"TextRendererMixin",
-        //? if > 1.8.9
         "EntityRendererMixin",
+        //? if = 1.8.9
+        //"LivingEntityRendererMixin",
         "PlayerTabOverlayMixin"
     ],
     "injectors": {

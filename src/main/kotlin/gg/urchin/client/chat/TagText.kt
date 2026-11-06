@@ -1,11 +1,16 @@
 package gg.urchin.client.chat
 
+import gg.urchin.UrchinConstants
 import gg.urchin.api.Tag
+import gg.urchin.api.TagIcon
 import gg.urchin.api.TagType
+import gg.urchin.client.settings.Settings
+import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 
 private const val MILLIS_PER_SECOND = 1000L
+private val ICON_FONT = Key.key(UrchinConstants.ID, "icons")
 private val TIME_UNITS = listOf(
     "year" to 31_536_000L,
     "month" to 2_592_000L,
@@ -15,7 +20,16 @@ private val TIME_UNITS = listOf(
 )
 
 object TagText {
-    fun badge(type: TagType): Component = bracketed(type.icon, type.color)
+    /** What goes between a name and its badges: a normal space, or a thin gap when badges are icons. */
+    fun gap(): Component =
+        if (Settings.iconsOn) Component.text(TagIcon.GAP.toString()).font(ICON_FONT) else Component.space()
+
+    /** `[CCC]`, or the tag's Material Design icon when "MDI Icons" is on. */
+    fun badge(type: TagType): Component {
+        val icon = type.mdi
+        if (Settings.tagIcons && icon != null) return Component.text(icon.glyph.toString(), type.mdiColor).font(ICON_FONT)
+        return bracketed(type.icon, type.color)
+    }
 
     fun badges(tags: List<Tag>, name: String): List<Component> {
         val hover = hover(tags)

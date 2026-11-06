@@ -92,6 +92,20 @@ dependencies {
         for (module in arrayOf("lwjgl", "lwjgl-opengl")) {
             compileOnly("org.lwjgl:$module:${sc.properties["deps.lwjgl"] as String}")
         }
+
+        // Standalone (no OneConfig) needs these at runtime, so they are nested in the jar. OneConfig nests the
+        // same versions; Fabric Loader keeps one copy (the newest) when both are present.
+        val adventure = sc.properties["deps.adventure"] as String
+        for (module in arrayOf("api", "key", "text-serializer-gson", "text-serializer-json", "text-serializer-commons", "text-serializer-plain")) {
+            include("net.kyori:adventure-$module:$adventure")
+        }
+        for (module in arrayOf("examination-api", "examination-string")) {
+            include("net.kyori:$module:${sc.properties["deps.examination"] as String}")
+        }
+        include("net.kyori:option:${sc.properties["deps.kyori_option"] as String}")
+        include("net.hypixel:mod-api:${sc.properties["deps.hypixel_mod_api"] as String}")
+        include("net.hypixel:hypixel-data:${sc.properties["deps.hypixel_data"] as String}")
+        include("net.fabricmc:fabric-language-kotlin:${sc.properties["deps.fabric_language_kotlin"] as String}")
     }
 
     testImplementation("org.junit.jupiter:junit-jupiter:${sc.properties["deps.junit"] as String}")
@@ -162,10 +176,16 @@ tasks {
             "minecraft_version_range" to versionrange,
             "loader_version" to loaderversion,
             "oneconfig_version" to oneconfigversion,
+            // 26.3 always needs OneConfig. 1.8.9 runs with or without it, so it only states its Java requirement.
+            "required_id" to if (isOrnithe) "java" else "oneconfigv1",
+            "required_range" to if (isOrnithe) ">=${requiredJava.majorVersion}" else ">=$oneconfigversion",
         )
 
         inputs.properties(props)
 
         filesMatching("fabric.mod.json") { expand(props) }
+
+        // Only the 1.8.9 standalone settings screen uses these.
+        if (!isOrnithe) exclude("assets/$modid/fonts/**", "assets/$modid/textures/gui/**", "assets/$modid/licenses/Roboto-LICENSE.txt")
     }
 }

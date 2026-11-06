@@ -1,0 +1,17 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "gg.urchin.standalonemixin",
+    "plugin": "gg.urchin.StandaloneMixinPlugin",
+    "compatibilityLevel": "JAVA_21",
+    "client": [
+        //? if = 1.8.9 {
+        /*"ClientPlayNetworkHandlerMixin",
+        "LocalClientPlayerEntityMixin",
+        "MinecraftMixin"
+        *///?}
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

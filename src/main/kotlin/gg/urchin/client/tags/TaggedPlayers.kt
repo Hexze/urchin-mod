@@ -25,5 +25,7 @@ object TaggedPlayers {
 
     fun topTag(uuid: UUID): TagType? = tagsByUuid[uuid]?.map { it.type }?.minByOrNull { it.priority }
 
+    fun topTagNamed(name: String): TagType? = tagsByName[name]?.map { it.type }?.minByOrNull { it.priority }
+
     fun tagsNamed(name: String): List<Tag> = tagsByName[name].orEmpty()
 }

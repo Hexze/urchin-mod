@@ -26,6 +26,11 @@ fun containsTagBadge(text: String): Boolean = ANY_TAG_BADGE.containsMatchIn(text
 
 fun startsWithTagBadge(text: String, index: Int): Boolean = LEADING_TAG_BADGE.matchesAt(text, index)
 
+// For text that may or may not be the player's name (the score under a name tag is drawn the same way) and may
+// already carry the label: only text showing the name gets it, and only once.
+fun labelNameOnce(text: String, name: String, label: String): String =
+    if (label in text || nameEnd(text, name) == null) text else insertAfterName(text, name, label)
+
 fun activeFormatting(text: String): String =
     FORMATTING_CODES.findAll(text).fold("") { active, code ->
         when (code.value[1].lowercaseChar()) {

@@ -3,7 +3,6 @@ package gg.urchin.api
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import org.polyfrost.oneconfig.utils.v1.Multithreading
 import java.io.IOException
 import java.net.URI
 import java.net.URLEncoder
@@ -14,6 +13,9 @@ import java.net.http.HttpResponse
 import java.net.http.HttpResponse.BodyHandlers
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicInteger
 
 private const val HOST = "https://api.urchin.gg"
 private const val UNAUTHORIZED = 401
@@ -27,6 +29,10 @@ class ApiException(val status: Int, val error: String?) : IOException(error ?: "
 
 object UrchinApi {
     private val http = HttpClient.newBuilder().connectTimeout(TIMEOUT).build()
+    private val worker: Executor = run {
+        val count = AtomicInteger()
+        Executors.newCachedThreadPool { task -> Thread(task, "Urchin API ${count.incrementAndGet()}").apply { isDaemon = true } }
+    }
     private var token: CompletableFuture<String>? = null
 
     fun lookupTags(uuids: List<String>): CompletableFuture<TagBatch> =
@@ -63,7 +69,7 @@ object UrchinApi {
     private fun signIn(): CompletableFuture<String> =
         send(request("/v3/auth/minecraft/challenge").POST(BodyPublishers.noBody()))
             .thenApply { decode<Challenge>(it).serverId }
-            .thenApplyAsync({ serverId -> serverId.also(MinecraftSession::joinServer) }, Multithreading.getExecutor())
+            .thenApplyAsync({ serverId -> serverId.also(MinecraftSession::joinServer) }, worker)
             .thenCompose { serverId -> send(request("/v3/auth/minecraft").json("POST", Login(MinecraftSession.username, serverId))) }
             .thenApply { decode<LoginResponse>(it).token }
 
