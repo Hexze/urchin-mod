@@ -31,7 +31,7 @@
     },
     "custom": {
         "sarcio:disable": [
-            "mem.alloc.render.LivingEntityRendererMixin"
+            "mem.alloc.name_tag_text"
         ]
     }
 }
