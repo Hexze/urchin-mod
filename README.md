@@ -1,6 +1,6 @@
 # Urchin
 
-Urchin blacklist integration for OneClient
+Keyless Urchin blacklist integration for OneClient
 
 - Get a chat alert when a tagged player joins your game
 - See tags next to tagged players in the tab list, above their heads and in chat
