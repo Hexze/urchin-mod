@@ -5,7 +5,7 @@
     "compatibilityLevel": "JAVA_21",
     "client": [
         //? if = 1.8.9
-        //"ArgentumTextBatcherMixin",
+        //"ArgentumFontSetMixin",
         "ChatHistoryAccessor",
         //? if = 1.8.9
         //"ChatGuiMixin",
