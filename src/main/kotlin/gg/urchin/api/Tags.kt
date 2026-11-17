@@ -17,9 +17,12 @@ enum class TagType(
     BLATANT_CHEATER("blatant_cheater", "Blatant Cheater", "bc", "BC", NamedTextColor.GOLD, 1, true),
     CLOSET_CHEATER("closet_cheater", "Closet Cheater", "cc", "CC", NamedTextColor.GOLD, 1, true),
     CONFIRMED_CHEATER("confirmed_cheater", "Confirmed Cheater", "ccc", "CCC", NamedTextColor.DARK_PURPLE, 1, false),
-    REPLAYS_NEEDED("replays_needed", "Replays Needed", "rn", "RN", NamedTextColor.GRAY, 2, false),
+    REPLAYS_NEEDED("replays_needed", "Replays Needed", "rn", "RN", NamedTextColor.GRAY, 2, true),
     CAUTION("caution", "Caution", "c", "C", NamedTextColor.GRAY, 3, true),
     UNKNOWN("unknown", "Unknown", "?", "?", NamedTextColor.WHITE, 99, false);
+
+    val takesDuration: Boolean
+        get() = this == REPLAYS_NEEDED
 
     companion object {
         val addable: List<TagType> = entries.filter { it.addable }

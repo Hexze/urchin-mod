@@ -41,10 +41,7 @@ object TagText {
         Component.textOfChildren(badge(type), Component.text(" ${type.display}", NamedTextColor.WHITE))
 
     private fun facts(tag: Tag): List<Component> = listOfNotNull(
-        Component.textOfChildren(
-            Component.text("> ", NamedTextColor.DARK_GRAY),
-            Component.text(tag.reason ?: "No reason", NamedTextColor.GRAY),
-        ),
+        reasonLine(tag),
         tag.addedOn?.let { addedOn ->
             Component.textOfChildren(
                 Component.text("- Added", NamedTextColor.DARK_GRAY),
@@ -54,6 +51,15 @@ object TagText {
         },
         tag.expiresAt?.let { Component.text("- ${expiry(it)}", NamedTextColor.DARK_GRAY) },
     )
+
+    private fun reasonLine(tag: Tag): Component? {
+        val reason = tag.reason?.takeIf(String::isNotBlank)
+        if (reason == null && tag.type.takesDuration) return null
+        return Component.textOfChildren(
+            Component.text("> ", NamedTextColor.DARK_GRAY),
+            Component.text(reason ?: "No reason", NamedTextColor.GRAY),
+        )
+    }
 
     private fun tagger(name: String, hidden: Boolean): Component = Component.textOfChildren(
         Component.text(" by @$name", NamedTextColor.GRAY),

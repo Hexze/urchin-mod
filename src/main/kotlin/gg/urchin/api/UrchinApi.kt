@@ -48,8 +48,8 @@ object UrchinApi {
         authorized(request("/v3/player/tags?${playerQuery(identifier)}&reveal_hidden=$revealHidden").GET())
             .thenApply { if (it.statusCode() == NOT_FOUND) null else decode<PlayerTags>(it) }
 
-    fun addTag(uuid: String, type: TagType, reason: String): CompletableFuture<Void> =
-        writeTag(uuid, "POST", AddTag(type.id, reason))
+    fun addTag(uuid: String, type: TagType, reason: String, duration: String?): CompletableFuture<Void> =
+        writeTag(uuid, "POST", AddTag(type.id, reason, duration))
 
     fun overwriteTag(uuid: String, current: TagType, replacement: TagType, reason: String): CompletableFuture<Void> =
         writeTag(uuid, "PATCH", OverwriteTag(current.id, replacement.id, reason))
@@ -142,7 +142,7 @@ private class LoginResponse(val token: String)
 private class BatchRequest(val uuids: List<String>)
 
 @Serializable
-private class AddTag(val type: String, val reason: String)
+private class AddTag(val type: String, val reason: String, val duration: String?)
 
 @Serializable
 private class OverwriteTag(

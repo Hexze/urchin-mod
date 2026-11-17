@@ -77,7 +77,7 @@ internal object TagPanels {
                     lines(
                         listOf(
                             Component.text(type.display, type.color),
-                            Component.text("/urchin tag <player> ${type.alias} <reason>", NamedTextColor.DARK_GRAY),
+                            Component.text("/urchin tag <player> ${type.alias} ${usage(type)}", NamedTextColor.DARK_GRAY),
                         ),
                     ),
                 )
@@ -120,10 +120,15 @@ internal object TagPanels {
                 Component.textOfChildren(
                     tagAction("Add ", type, NamedTextColor.GRAY),
                     Component.text(" to ${target.name}", NamedTextColor.GRAY),
-                    Component.text("\nClick, then type a reason and press enter", NamedTextColor.DARK_GRAY),
+                    Component.text("\nClick, then ${entryHint(type)}", NamedTextColor.DARK_GRAY),
                 ),
             )
             .suggesting("/urchin tag ${target.name} ${type.alias} ")
+
+    private fun entryHint(type: TagType): String =
+        if (type.takesDuration) "type a duration like 10d, or press enter for 14 days" else "type a reason and press enter"
+
+    private fun usage(type: TagType): String = if (type.takesDuration) "[duration]" else "<reason>"
 
     private fun card(title: String, target: Target, body: List<Component>, footer: Component? = null): Framed =
         Framed(Component.text(title, NamedTextColor.WHITE), listOf(ign(target)) + body, footer)

@@ -48,12 +48,12 @@ internal sealed class PendingAction(val target: Target) {
     open fun undo(): PendingAction? = null
 }
 
-internal class TagAddition(target: Target, private val type: TagType, private val reason: String) : PendingAction(target) {
-    override fun perform() = UrchinApi.addTag(target.uuid, type, reason)
+internal class TagAddition(target: Target, private val tag: Tag, private val duration: String? = null) : PendingAction(target) {
+    override fun perform() = UrchinApi.addTag(target.uuid, tag.type, tag.reason.orEmpty(), duration)
 
-    override fun result() = TagPanels.added(target, addedNow(type, reason))
+    override fun result() = TagPanels.added(target, tag.copy(addedOn = System.currentTimeMillis()))
 
-    override fun undo() = TagRemoval(target, addedNow(type, reason))
+    override fun undo() = TagRemoval(target, tag.copy(addedOn = System.currentTimeMillis()))
 }
 
 internal class TagOverwrite(
@@ -81,14 +81,26 @@ object TagActions {
 
     fun openPanel(name: String) = lookUp(name) { show(it.name, TagPanels.panel(it)) }
 
-    fun tag(name: String, input: String, reason: String) {
+    fun tag(name: String, input: String, details: String) {
         val type = TagType.byInput(input)
         when {
             type == TagType.CONFIRMED_CHEATER -> showError(name, "Confirmed Cheater tags can only be applied through the review system.")
-            type == TagType.REPLAYS_NEEDED -> showError(name, "Replays Needed tags must be added through the Urchin bot (/watch).")
             type == null || !type.addable -> unknownType(name, input)
-            reason.isBlank() -> show(name, Chat.warningText("Add a reason: /urchin tag $name ${type.alias} <reason>"))
-            else -> lookUp(name) { propose(it, type, reason.trim()) }
+            type.takesDuration -> watch(name, details)
+            details.isBlank() -> show(name, Chat.warningText("Add a reason: /urchin tag $name ${type.alias} <reason>"))
+            else -> lookUp(name) { propose(it, type, details.trim()) }
+        }
+    }
+
+    private fun watch(name: String, input: String) {
+        val length = WatchLength.parse(input) ?: return showError(name, "Durations look like 48h, 10d, 2w, or permanent.")
+        lookUp(name) { target ->
+            if (target.tags.any { it.type == TagType.REPLAYS_NEEDED }) {
+                showError(target.name, "${target.name} already has a Replays Needed tag.")
+            } else {
+                val proposed = Tag(TagType.REPLAYS_NEEDED.id, expiresAt = length.expiresAt())
+                offer(TagAddition(target, proposed, length.apiValue), TagPanels.addPrompt(target, proposed))
+            }
         }
     }
 
@@ -121,7 +133,7 @@ object TagActions {
         val conflict = target.tags.firstOrNull { it.type.priority == type.priority }
         val proposed = Tag(type.id, reason)
         if (conflict == null) {
-            offer(TagAddition(target, type, reason), TagPanels.addPrompt(target, proposed))
+            offer(TagAddition(target, proposed), TagPanels.addPrompt(target, proposed))
         } else {
             offer(TagOverwrite(target, conflict.type, type, reason), TagPanels.overwritePrompt(target, conflict, proposed))
         }
