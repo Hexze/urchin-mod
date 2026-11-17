@@ -42,6 +42,7 @@ data class Tag(
     @SerialName("added_by") val addedById: Long? = null,
     @SerialName("added_by_username") val addedBy: String? = null,
     @SerialName("expires_at") val expiresAt: Long? = null,
+    @SerialName("hide_username") val hideUsername: Boolean = false,
 ) {
     val type: TagType
         get() = TagType.byId(typeId)

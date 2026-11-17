@@ -48,11 +48,16 @@ object TagText {
         tag.addedOn?.let { addedOn ->
             Component.textOfChildren(
                 Component.text("- Added", NamedTextColor.DARK_GRAY),
-                tag.addedBy?.let { Component.text(" by @$it", NamedTextColor.GRAY) } ?: Component.empty(),
+                tag.addedBy?.let { tagger(it, tag.hideUsername) } ?: Component.empty(),
                 Component.text(" ${timeAgo(addedOn)}", NamedTextColor.DARK_GRAY),
             )
         },
         tag.expiresAt?.let { Component.text("- ${expiry(it)}", NamedTextColor.DARK_GRAY) },
+    )
+
+    private fun tagger(name: String, hidden: Boolean): Component = Component.textOfChildren(
+        Component.text(" by @$name", NamedTextColor.GRAY),
+        if (hidden) Component.text(" (hidden)", NamedTextColor.DARK_GRAY) else Component.empty(),
     )
 
     private fun hover(tags: List<Tag>): Component = card(tags, Component.text("Click to paste info in chat", NamedTextColor.DARK_GRAY))

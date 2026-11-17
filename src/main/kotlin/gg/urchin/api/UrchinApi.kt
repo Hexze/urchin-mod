@@ -44,8 +44,8 @@ object UrchinApi {
     fun lookupTags(uuids: List<String>): CompletableFuture<TagBatch> =
         authorized(request("/v3/players").json("POST", BatchRequest(uuids))).thenApply { decode<TagBatch>(it) }
 
-    fun lookupPlayer(identifier: String): CompletableFuture<PlayerTags?> =
-        authorized(request("/v3/player/tags?${playerQuery(identifier)}").GET())
+    fun lookupPlayer(identifier: String, revealHidden: Boolean): CompletableFuture<PlayerTags?> =
+        authorized(request("/v3/player/tags?${playerQuery(identifier)}&reveal_hidden=$revealHidden").GET())
             .thenApply { if (it.statusCode() == NOT_FOUND) null else decode<PlayerTags>(it) }
 
     fun addTag(uuid: String, type: TagType, reason: String): CompletableFuture<Void> =

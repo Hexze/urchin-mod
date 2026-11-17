@@ -5,6 +5,7 @@ import gg.urchin.api.PlayerTags
 import gg.urchin.api.Tag
 import gg.urchin.api.TagType
 import gg.urchin.api.UrchinApi
+import gg.urchin.client.Account
 import gg.urchin.client.Game
 import gg.urchin.client.chat.Chat
 import gg.urchin.client.chat.ChatEntry
@@ -136,7 +137,7 @@ object TagActions {
 
     private fun lookUp(name: String, then: (Target) -> Unit) {
         show(name, Chat.infoText("Looking up $name..."))
-        UrchinApi.lookupPlayer(name).whenCompleteAsync({ player, error ->
+        UrchinApi.lookupPlayer(name, Account.revealsHiddenTaggers).whenCompleteAsync({ player, error ->
             when {
                 error != null -> showError(name, describe(error))
                 player == null -> showError(name, "Player not found: $name")
