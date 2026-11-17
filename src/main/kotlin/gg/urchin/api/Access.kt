@@ -2,6 +2,9 @@ package gg.urchin.api
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.time.Duration.Companion.minutes
+
+private val OWN_TAG_EDIT_WINDOW = 30.minutes
 
 @Serializable
 data class Access(val member: MemberAccess? = null)
@@ -29,4 +32,9 @@ data class MemberAccess(
 
     val restricted: Boolean
         get() = suspended || taggingDisabled
+
+    fun addedWithinEditWindow(tag: Tag, now: Long): Boolean {
+        val addedOn = tag.addedOn ?: return false
+        return discordId != null && tag.addedById?.toString() == discordId && now - addedOn <= OWN_TAG_EDIT_WINDOW.inWholeMilliseconds
+    }
 }

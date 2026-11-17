@@ -6,11 +6,16 @@ import com.mojang.brigadier.arguments.StringArgumentType.greedyString
 import com.mojang.brigadier.arguments.StringArgumentType.word
 import com.mojang.brigadier.builder.ArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
+import com.mojang.brigadier.suggestion.Suggestions
+import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import gg.urchin.UrchinConstants
+import gg.urchin.api.TagType
+import gg.urchin.client.Account
 import gg.urchin.client.UrchinConfig
 import org.polyfrost.oneconfig.api.commands.v1.CommandManager
 import org.polyfrost.oneconfig.api.commands.v1.CommandManager.literal
 import org.polyfrost.oneconfig.utils.v1.dsl.addDefaultCommand
+import java.util.concurrent.CompletableFuture
 
 object UrchinCommand {
     fun register() = CommandManager.register(
@@ -23,7 +28,7 @@ object UrchinCommand {
                     CommandManager.argument("player", word())
                         .runs { TagActions.openPanel(getString(it, "player")) }
                         .then(
-                            CommandManager.argument("type", word())
+                            tagTypeArgument { Account.addableTypes }
                                 .runs { TagActions.tag(getString(it, "player"), getString(it, "type"), "") }
                                 .then(
                                     CommandManager.argument("reason", greedyString())
@@ -35,7 +40,7 @@ object UrchinCommand {
             .then(
                 literal("untag").then(
                     CommandManager.argument("player", word()).then(
-                        CommandManager.argument("type", word())
+                        tagTypeArgument { Account.removableTypes }
                             .runs { TagActions.untag(getString(it, "player"), getString(it, "type")) },
                     ),
                 ),
@@ -48,9 +53,17 @@ object UrchinCommand {
     )
 }
 
+private fun tagTypeArgument(types: () -> List<TagType>) =
+    CommandManager.argument("type", word()).suggests { _, builder -> builder.suggestMatching(types().map(TagType::alias)) }
+
 private fun checkPlayers() =
     CommandManager.argument("players", greedyString())
         .runs { TagActions.check(getString(it, "players").split(' ').filter(String::isNotBlank)) }
+
+private fun SuggestionsBuilder.suggestMatching(options: List<String>): CompletableFuture<Suggestions> {
+    options.filter { it.lowercase().startsWith(remainingLowerCase) }.forEach(::suggest)
+    return buildFuture()
+}
 
 private fun <S, T : ArgumentBuilder<S, T>> T.runs(action: (CommandContext<S>) -> Unit): T =
     executes { context ->

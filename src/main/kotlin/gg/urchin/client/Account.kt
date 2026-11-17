@@ -3,6 +3,7 @@ package gg.urchin.client
 import gg.urchin.api.Access
 import gg.urchin.api.ApiException
 import gg.urchin.api.MemberAccess
+import gg.urchin.api.Tag
 import gg.urchin.api.TagType
 import gg.urchin.api.UrchinApi
 import org.polyfrost.oneconfig.api.event.v1.eventHandler
@@ -33,6 +34,9 @@ object Account {
 
     val revealsHiddenTaggers: Boolean
         get() = access?.member?.revealsHiddenTaggers == true
+
+    fun canRemove(tag: Tag): Boolean =
+        tag.type in removableTypes || access?.member?.addedWithinEditWindow(tag, System.currentTimeMillis()) == true
 
     fun register() {
         UrchinApi.apiKey = UrchinConfig.apiKey.trim()

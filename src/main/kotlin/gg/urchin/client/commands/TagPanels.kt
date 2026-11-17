@@ -2,6 +2,7 @@ package gg.urchin.client.commands
 
 import gg.urchin.api.Tag
 import gg.urchin.api.TagType
+import gg.urchin.client.Account
 import gg.urchin.client.chat.Framed
 import gg.urchin.client.chat.TagText
 import gg.urchin.client.chat.bracketed
@@ -66,7 +67,7 @@ internal object TagPanels {
         Component.text("Tag types: ", NamedTextColor.GRAY),
         Component.join(
             JoinConfiguration.separator(Component.text(", ", NamedTextColor.GRAY)),
-            TagType.addable.map { type ->
+            Account.addableTypes.map { type ->
                 Component.textOfChildren(
                     Component.text(type.alias, type.color),
                     Component.text(" (", NamedTextColor.DARK_GRAY),
@@ -93,32 +94,36 @@ internal object TagPanels {
         if (target.tags.isEmpty()) return listOf(Component.text("None", NamedTextColor.DARK_GRAY))
         return TagText.stacked(target.tags) { tag ->
             val details = TagText.details(tag, target.name)
-            listOf(Component.textOfChildren(details.first(), Component.space(), removeButton(target, tag))) + details.drop(1)
+            listOf(withRemoveButton(target, tag, details.first())) + details.drop(1)
         }
     }
+
+    private fun withRemoveButton(target: Target, tag: Tag, title: Component): Component =
+        if (Account.canRemove(tag)) Component.textOfChildren(title, Component.space(), removeButton(target, tag)) else title
 
     private fun removeButton(target: Target, tag: Tag): Component =
         bracketed("X", NamedTextColor.RED)
             .hoverEvent(Component.text("Click to remove this tag", NamedTextColor.RED))
             .running("/urchin untag ${target.name} ${tag.type.alias}")
 
-    private fun addButtons(target: Target): Component = Component.textOfChildren(
-        Component.text("Add Tag:", NamedTextColor.GRAY),
-        *TagType.addable.map { type ->
-            Component.textOfChildren(
-                Component.space(),
-                TagText.badge(type)
-                    .hoverEvent(
-                        Component.textOfChildren(
-                            tagAction("Add ", type, NamedTextColor.GRAY),
-                            Component.text(" to ${target.name}", NamedTextColor.GRAY),
-                            Component.text("\nClick, then type a reason and press enter", NamedTextColor.DARK_GRAY),
-                        ),
-                    )
-                    .suggesting("/urchin tag ${target.name} ${type.alias} "),
+    private fun addButtons(target: Target): Component? {
+        val types = Account.addableTypes.takeIf { it.isNotEmpty() } ?: return null
+        return Component.textOfChildren(
+            Component.text("Add Tag:", NamedTextColor.GRAY),
+            *types.map { type -> Component.textOfChildren(Component.space(), addButton(target, type)) }.toTypedArray(),
+        )
+    }
+
+    private fun addButton(target: Target, type: TagType): Component =
+        TagText.badge(type)
+            .hoverEvent(
+                Component.textOfChildren(
+                    tagAction("Add ", type, NamedTextColor.GRAY),
+                    Component.text(" to ${target.name}", NamedTextColor.GRAY),
+                    Component.text("\nClick, then type a reason and press enter", NamedTextColor.DARK_GRAY),
+                ),
             )
-        }.toTypedArray(),
-    )
+            .suggesting("/urchin tag ${target.name} ${type.alias} ")
 
     private fun card(title: String, target: Target, body: List<Component>, footer: Component? = null): Framed =
         Framed(Component.text(title, NamedTextColor.WHITE), listOf(ign(target)) + body, footer)
