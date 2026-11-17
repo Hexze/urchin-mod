@@ -5,9 +5,9 @@ import org.polyfrost.oneconfig.api.config.v1.KtConfig
 import org.polyfrost.oneconfig.api.platform.v1.DesktopHelper
 import java.net.URI
 
+private const val ACCOUNT = "Account"
 private const val ALERTS = "Alerts"
 private const val LABELS = "Labels"
-private const val ACCOUNT = "Account"
 private val DISCORD_INVITE = URI("https://discord.gg/urchin")
 
 object UrchinConfig : KtConfig(
@@ -17,6 +17,26 @@ object UrchinConfig : KtConfig(
     icon = "/assets/${UrchinConstants.ID}/icon.png",
 ) {
     var enabled by masterToggle()
+
+    val account by info(
+        name = "Signing In",
+        description = "Checking your access.",
+        subcategory = ACCOUNT,
+    )
+
+    var apiKey by text(
+        name = "API Key",
+        description = "Optional. Your Minecraft account is used when this is empty.",
+        placeholder = "Get one with /dashboard in the Urchin Discord",
+        subcategory = ACCOUNT,
+    ).onChange(Account::keyChanged)
+
+    val urchinDiscord by button(
+        name = "Urchin Discord",
+        description = "discord.gg/urchin",
+        subcategory = ACCOUNT,
+        text = "Join",
+    ) { DesktopHelper.browse(DISCORD_INVITE) }
 
     var alertsFor by audience(
         name = "Alert For",
@@ -71,20 +91,6 @@ object UrchinConfig : KtConfig(
         subcategory = LABELS,
     )
 
-    val limitedAccess by info(
-        name = "Limited Access",
-        description = "You can request and view blacklist tags. To use other features, provide an API key or " +
-            "link this Minecraft account to your Discord account in the Urchin Discord.",
-        subcategory = ACCOUNT,
-    )
-
-    val urchinDiscord by button(
-        name = "Urchin Discord",
-        description = "discord.gg/urchin",
-        subcategory = ACCOUNT,
-        text = "Join",
-    ) { DesktopHelper.browse(DISCORD_INVITE) }
-
     init {
         addAliases(*arrayOf("blacklist", "tags"))
         disableAllUnless(::enabled.name)
@@ -92,6 +98,14 @@ object UrchinConfig : KtConfig(
 
     val audiences: List<Audience>
         get() = listOf(alertsFor, tabLabelsFor, nametagLabelsFor, chatLabelsFor)
+
+    fun showAccount(card: AccountCard) {
+        ::account.property.apply {
+            addMetadata("title", card.title)
+            addMetadata("description", card.description)
+            addMetadata("type", card.type)
+        }
+    }
 
     private fun audience(name: String, def: Audience, description: String, subcategory: String) = dropdown(
         name = name,

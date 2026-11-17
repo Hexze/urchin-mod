@@ -23,6 +23,7 @@ enum class TagType(
 
     companion object {
         val addable: List<TagType> = entries.filter { it.addable }
+        val known: List<TagType> = entries - UNKNOWN
 
         fun byId(id: String): TagType = entries.firstOrNull { it.id == id } ?: UNKNOWN
 

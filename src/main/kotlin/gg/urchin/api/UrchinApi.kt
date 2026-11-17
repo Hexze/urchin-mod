@@ -16,6 +16,7 @@ import java.time.Duration
 import java.util.concurrent.CompletableFuture
 
 private const val HOST = "https://api.urchin.gg"
+private const val API_KEY_HEADER = "X-API-Key"
 private const val UNAUTHORIZED = 401
 private const val NOT_FOUND = 404
 private const val FIRST_ERROR_STATUS = 400
@@ -28,6 +29,17 @@ class ApiException(val status: Int, val error: String?) : IOException(error ?: "
 object UrchinApi {
     private val http = HttpClient.newBuilder().connectTimeout(TIMEOUT).build()
     private var token: CompletableFuture<String>? = null
+
+    @Volatile
+    var apiKey = ""
+
+    @Volatile
+    private var rejectedKey: String? = null
+
+    val keyRejected: Boolean
+        get() = apiKey.isNotEmpty() && apiKey == rejectedKey
+
+    fun access(): CompletableFuture<Access> = authorized(request("/v3/access").GET()).thenApply { decode<Access>(it) }
 
     fun lookupTags(uuids: List<String>): CompletableFuture<TagBatch> =
         authorized(request("/v3/players").json("POST", BatchRequest(uuids))).thenApply { decode<TagBatch>(it) }
@@ -51,6 +63,15 @@ object UrchinApi {
     private fun playerQuery(identifier: String): String = "player=${URLEncoder.encode(identifier, Charsets.UTF_8)}"
 
     private fun authorized(request: HttpRequest.Builder): CompletableFuture<HttpResponse<String>> {
+        val key = apiKey.takeUnless { it.isEmpty() || it == rejectedKey } ?: return signedIn(request)
+        return send(request.copy().header(API_KEY_HEADER, key)).thenCompose { response ->
+            if (response.statusCode() != UNAUTHORIZED) return@thenCompose CompletableFuture.completedFuture(response)
+            rejectedKey = key
+            signedIn(request)
+        }
+    }
+
+    private fun signedIn(request: HttpRequest.Builder): CompletableFuture<HttpResponse<String>> {
         val session = currentToken()
         return session
             .thenCompose { send(request.signed(it)) }
