@@ -64,7 +64,7 @@ repositories {
         content { includeGroup("pl.tomgirl") }
     }
     strictMaven(if (isOrnithe) "https://maven.ornithemc.net/releases" else "https://maven.terraformersmc.com/", "TerraformersMC", "com.terraformersmc")
-    strictMaven("https://maven.pkg.jetbrains.space/public/p/compose/dev", "JetBrains Compose Dev", "org.jetbrains.skiko")
+    strictMaven("https://packages.jetbrains.team/maven/p/cmp/dev", "JetBrains Compose Dev", "org.jetbrains.skiko")
     strictMaven("https://maven.fabricmc.net/", "FabricMC", "net.fabricmc")
     strictMaven("https://api.modrinth.com/maven", "Modrinth", "maven.modrinth")
 }
