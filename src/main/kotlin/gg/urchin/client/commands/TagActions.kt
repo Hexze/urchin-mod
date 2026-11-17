@@ -42,7 +42,7 @@ internal class Target(input: String, player: PlayerTags) {
 internal sealed class PendingAction(val target: Target) {
     abstract fun perform(): CompletableFuture<Void>
 
-    abstract fun result(): Component
+    abstract fun result(): ComponentLike
 
     open fun undo(): PendingAction? = null
 }

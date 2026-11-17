@@ -17,60 +17,50 @@ private val UUID_PARTS = Regex("(.{8})(.{4})(.{4})(.{4})(.{12})")
 internal object TagPanels {
     fun panel(target: Target): Framed = Framed(ign(target), tagList(target), addButtons(target))
 
-    fun addPrompt(target: Target, proposed: Tag): Framed = prompt(
+    fun addPrompt(target: Target, proposed: Tag): Framed = card(
         "Add Tag",
         target,
         TagText.proposedDetails(proposed),
-        "Proceed?",
-        confirmButton(target, NamedTextColor.GREEN, tagAction("Add the ", proposed.type, NamedTextColor.GREEN)),
-    )
-
-    fun overwritePrompt(target: Target, current: Tag, replacement: Tag): Framed = prompt(
-        "Overwrite Tag",
-        target,
-        listOf(Component.text("Current", NamedTextColor.DARK_GRAY)) + TagText.details(current, target.name),
-        "This player already has an incompatible tag. Proceed and overwrite with yours?",
-        confirmButton(
-            target,
-            NamedTextColor.RED,
-            lines(listOf(Component.text("Overwrite with:", NamedTextColor.GRAY)) + TagText.hoverDetails(replacement)),
+        question(
+            "Proceed?",
+            confirmButton(target, "Yes", NamedTextColor.GREEN, tagAction("Add the ", proposed.type, NamedTextColor.GREEN)),
         ),
     )
 
-    fun removePrompt(target: Target, tag: Tag): Framed = prompt(
+    fun overwritePrompt(target: Target, current: Tag, replacement: Tag): Framed = card(
+        "Overwrite Tag",
+        target,
+        listOf(Component.text("Current", NamedTextColor.DARK_GRAY)) + TagText.details(current, target.name),
+        question(
+            "This player already has an incompatible tag. Proceed and overwrite with yours?",
+            confirmButton(
+                target,
+                "Yes",
+                NamedTextColor.RED,
+                lines(listOf(Component.text("Overwrite with:", NamedTextColor.GRAY)) + TagText.hoverDetails(replacement)),
+            ),
+        ),
+    )
+
+    fun removePrompt(target: Target, tag: Tag): Framed = card(
         "Remove Tag",
         target,
         TagText.details(tag, target.name),
-        "Remove?",
-        confirmButton(target, NamedTextColor.RED, tagAction("Remove the ", tag.type, NamedTextColor.RED)),
+        confirmButton(target, "Confirm Remove", NamedTextColor.RED, tagAction("Remove the ", tag.type, NamedTextColor.RED)),
     )
 
-    fun added(target: Target, tag: Tag): Component = Component.textOfChildren(
-        Component.text("Tagged ", NamedTextColor.GREEN),
-        target.display,
-        Component.text(" as ", NamedTextColor.GREEN),
-        TagText.labeled(tag, target.name),
-        Component.text(". ", NamedTextColor.GREEN),
+    fun added(target: Target, tag: Tag): Framed = card(
+        "New Tag Applied",
+        target,
+        TagText.details(tag, target.name),
         bracketed("Undo", NamedTextColor.RED)
             .hoverEvent(Component.text("Remove this tag", NamedTextColor.GRAY))
             .running("/urchin confirm ${target.name}"),
     )
 
-    fun overwritten(target: Target, tag: Tag): Component = Component.textOfChildren(
-        Component.text("Overwrote ", NamedTextColor.GREEN),
-        target.display,
-        Component.text("'s tag with ", NamedTextColor.GREEN),
-        TagText.labeled(tag, target.name),
-        Component.text(".", NamedTextColor.GREEN),
-    )
+    fun overwritten(target: Target, tag: Tag): Framed = card("New Tag Applied", target, TagText.details(tag, target.name))
 
-    fun removed(target: Target, tag: Tag): Component = Component.textOfChildren(
-        Component.text("Removed ", NamedTextColor.RED),
-        TagText.labeled(tag, target.name),
-        Component.text(" from ", NamedTextColor.RED),
-        target.display,
-        Component.text(".", NamedTextColor.RED),
-    )
+    fun removed(target: Target, tag: Tag): Framed = card("Tag Removed", target, TagText.removedDetails(tag, target.name))
 
     fun tagTypes(): Component = Component.textOfChildren(
         Component.text("Tag types: ", NamedTextColor.GRAY),
@@ -130,17 +120,16 @@ internal object TagPanels {
         }.toTypedArray(),
     )
 
-    private fun prompt(title: String, target: Target, body: List<Component>, question: String, confirm: Component): Framed =
-        Framed(
-            Component.text(title, NamedTextColor.WHITE),
-            listOf(ign(target)) + body,
-            Component.textOfChildren(Component.text("$question ", NamedTextColor.GRAY), confirm),
-        )
+    private fun card(title: String, target: Target, body: List<Component>, footer: Component? = null): Framed =
+        Framed(Component.text(title, NamedTextColor.WHITE), listOf(ign(target)) + body, footer)
+
+    private fun question(text: String, confirm: Component): Component =
+        Component.textOfChildren(Component.text("$text ", NamedTextColor.GRAY), confirm)
 
     private fun ign(target: Target): Component = Component.textOfChildren(Component.text("IGN - ", NamedTextColor.GRAY), header(target))
 
-    private fun confirmButton(target: Target, color: NamedTextColor, hover: Component): Component =
-        bracketed("Yes", color).hoverEvent(hover).running("/urchin confirm ${target.name}")
+    private fun confirmButton(target: Target, label: String, color: NamedTextColor, hover: Component): Component =
+        bracketed(label, color).hoverEvent(hover).running("/urchin confirm ${target.name}")
 
     private fun tagAction(verb: String, type: TagType, color: NamedTextColor): Component =
         Component.textOfChildren(Component.text(verb, color), Component.text(type.display, type.color), Component.text(" tag", color))

@@ -4,6 +4,7 @@ import gg.urchin.api.Tag
 import gg.urchin.api.TagType
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 
 private const val MILLIS_PER_SECOND = 1000L
 private val TIME_UNITS = listOf(
@@ -25,6 +26,9 @@ object TagText {
     fun labeled(tag: Tag, name: String): Component = title(tag.type).withInfo(hover(listOf(tag)), name, tag)
 
     fun details(tag: Tag, name: String): List<Component> = listOf(labeled(tag, name)) + facts(tag)
+
+    fun removedDetails(tag: Tag, name: String): List<Component> =
+        listOf(labeled(tag, name).decorate(TextDecoration.STRIKETHROUGH)) + facts(tag)
 
     fun proposedDetails(tag: Tag): List<Component> = listOf(title(tag.type).hoverEvent(card(listOf(tag)))) + facts(tag)
 
