@@ -11,9 +11,15 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import gg.urchin.UrchinConstants
 import gg.urchin.api.TagType
 import gg.urchin.client.Account
+import gg.urchin.client.Game
+import gg.urchin.client.ListedPlayer
 import gg.urchin.client.UrchinConfig
+import gg.urchin.client.tags.accountOf
+import gg.urchin.client.tags.isLiveNick
+import net.hypixel.data.type.GameType
 import org.polyfrost.oneconfig.api.commands.v1.CommandManager
 import org.polyfrost.oneconfig.api.commands.v1.CommandManager.literal
+import org.polyfrost.oneconfig.api.hypixel.v1.HypixelUtils
 import org.polyfrost.oneconfig.utils.v1.dsl.addDefaultCommand
 import java.util.concurrent.CompletableFuture
 
@@ -25,7 +31,7 @@ object UrchinCommand {
             .then(literal("check").then(checkPlayers()))
             .then(
                 literal("tag").then(
-                    CommandManager.argument("player", word())
+                    playerArgument()
                         .runs { TagActions.openPanel(getString(it, "player")) }
                         .then(
                             tagTypeArgument { Account.addableTypes }
@@ -39,7 +45,7 @@ object UrchinCommand {
             )
             .then(
                 literal("untag").then(
-                    CommandManager.argument("player", word()).then(
+                    playerArgument().then(
                         tagTypeArgument { Account.removableTypes }
                             .runs { TagActions.untag(getString(it, "player"), getString(it, "type")) },
                     ),
@@ -53,12 +59,26 @@ object UrchinCommand {
     )
 }
 
+private fun playerArgument() =
+    CommandManager.argument("player", word()).suggests { _, builder -> builder.suggestMatching(onlineAccountNames()) }
+
 private fun tagTypeArgument(types: () -> List<TagType>) =
     CommandManager.argument("type", word()).suggests { _, builder -> builder.suggestMatching(types().map(TagType::alias)) }
 
 private fun checkPlayers() =
     CommandManager.argument("players", greedyString())
+        .suggests { _, builder ->
+            val lastName = builder.createOffset(builder.start + builder.remaining.lastIndexOf(' ') + 1)
+            lastName.suggestMatching(onlineAccountNames())
+        }
         .runs { TagActions.check(getString(it, "players").split(' ').filter(String::isNotBlank)) }
+
+private fun onlineAccountNames(): List<String> {
+    val inReplay = HypixelUtils.getLocation().serverType.orElse(null) == GameType.REPLAY
+    return Game.onlinePlayers()
+        .filter { !it.uuid.isLiveNick() && accountOf(it, inReplay) != null }
+        .map(ListedPlayer::name)
+}
 
 private fun SuggestionsBuilder.suggestMatching(options: List<String>): CompletableFuture<Suggestions> {
     options.filter { it.lowercase().startsWith(remainingLowerCase) }.forEach(::suggest)

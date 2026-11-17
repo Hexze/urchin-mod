@@ -50,6 +50,15 @@ object Game {
         return NativeText.toAdventure(name)
     }
 
+    fun onlinePlayers(): List<ListedPlayer> =
+        //? if = 1.8.9 {
+        /*Minecraft.getInstance().networkHandler?.onlinePlayers.orEmpty()
+            .map { ListedPlayer(it.profile.id, it.profile.name, texturesOf(it.profile)) }
+        *///?} else {
+        Minecraft.getInstance().connection?.onlinePlayers.orEmpty()
+            .map { ListedPlayer(it.profile.id(), it.profile.name(), texturesOf(it.profile)) }
+        //?}
+
     fun playersAddedBy(packet: Any): List<ListedPlayer> =
         //? if = 1.8.9 {
         /*(packet as? PlayerInfoS2CPacket)
