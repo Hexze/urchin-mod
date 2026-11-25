@@ -31,6 +31,9 @@ private class Segment(val text: String, val neutral: Boolean)
 private class Colon(val index: Int, val neutral: Boolean)
 
 object ChatLabels {
+    private var patternNames: Set<String> = emptySet()
+    private var pattern: Regex? = null
+
     //? if = 1.8.9 {
     /*@JvmStatic
     fun labelIncoming(message: Text): Text {
@@ -57,17 +60,25 @@ object ChatLabels {
     private fun shownNames(): Set<String> =
         if (UrchinConfig.enabled) TaggedPlayers.namesFor(UrchinConfig.chatLabelsFor) else emptySet()
 
-    private fun taggedNamePattern(): Regex? = shownNames().takeIf { it.isNotEmpty() }?.let(::namePattern)
+    private fun taggedNamePattern(): Regex? {
+        val names = shownNames()
+        if (names != patternNames) {
+            patternNames = names
+            pattern = names.takeIf { it.isNotEmpty() }?.let(::namePattern)
+        }
+        return pattern
+    }
 
     private fun labeled(message: Component, names: Regex): Component {
-        if (Chat.isOwn(message)) return message
+        if (!message.anyTextMatches(names) || Chat.isOwn(message)) return message
         return labelNames(message, names, skipBadged = StarfishPlugin.listening) { name -> TagText.badges(TaggedPlayers.tagsNamed(name), name) }
     }
 }
 
 internal fun labelNames(message: Component, names: Regex, skipBadged: Boolean, badges: (String) -> List<Component>): Component {
-    val bodyStart = senderColonOffset(message) ?: Int.MAX_VALUE
-    val content = segments(message, inheritedNeutral = true).joinToString("") { it.text }
+    val segments = segments(message)
+    val bodyStart = senderColonOffset(segments) ?: Int.MAX_VALUE
+    val content = segments.joinToString("") { it.text }
     var offset = 0
 
     fun label(component: Component): Component {
@@ -85,19 +96,27 @@ internal fun labelNames(message: Component, names: Regex, skipBadged: Boolean, b
     return label(message)
 }
 
-private fun senderColonOffset(message: Component): Int? {
+private fun Component.anyTextMatches(names: Regex): Boolean =
+    (this as? TextComponent)?.content()?.let(names::containsMatchIn) == true || children().any { it.anyTextMatches(names) }
+
+private fun senderColonOffset(segments: List<Segment>): Int? {
     var offset = 0
-    for (segment in segments(message, inheritedNeutral = true)) {
+    for (segment in segments) {
         firstColonIn(segment)?.let { return if (it.neutral) offset + it.index else null }
         offset += segment.text.length
     }
     return null
 }
 
-private fun segments(component: Component, inheritedNeutral: Boolean): List<Segment> {
+private fun segments(
+    component: Component,
+    inheritedNeutral: Boolean = true,
+    into: MutableList<Segment> = mutableListOf(),
+): List<Segment> {
     val neutral = component.color()?.let { it.value() in NEUTRAL_COLORS } ?: inheritedNeutral
-    val text = (component as? TextComponent)?.content().orEmpty()
-    return listOf(Segment(text, neutral)) + component.children().flatMap { segments(it, neutral) }
+    into += Segment((component as? TextComponent)?.content().orEmpty(), neutral)
+    component.children().forEach { segments(it, neutral, into) }
+    return into
 }
 
 private fun firstColonIn(segment: Segment): Colon? {
