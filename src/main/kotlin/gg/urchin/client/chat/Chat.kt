@@ -12,6 +12,7 @@ import org.polyfrost.oneconfig.api.platform.v1.Platform
 private const val SEPARATOR_WIDTH = 36
 private const val LOGO_SEPARATOR_LEAD = 1
 private const val LOGO_WIDTH_IN_DASHES = 2
+private const val SOCIAL_OPTIONS = "/socialoptions "
 
 private val LOGO = Component.textOfChildren(
     Component.text("[", NamedTextColor.DARK_GRAY),
@@ -67,5 +68,8 @@ fun lines(lines: List<ComponentLike>): Component = Component.join(JoinConfigurat
 fun Component.suggesting(command: String): Component = clickEvent(ClickEvent.suggestCommand(command))
 
 fun Component.running(command: String): Component = clickEvent(ClickEvent.runCommand(command))
+
+fun Component.chatSender(): String? =
+    (clickEvent()?.payload() as? ClickEvent.Payload.Text)?.value()?.takeIf { it.startsWith(SOCIAL_OPTIONS) }?.removePrefix(SOCIAL_OPTIONS)
 
 private fun dashes(count: Int): Component = Component.text("-".repeat(count), NamedTextColor.GRAY, TextDecoration.STRIKETHROUGH)
