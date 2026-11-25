@@ -1,5 +1,6 @@
 package gg.urchin.client.tags
 
+import gg.urchin.api.PlayerTags
 import gg.urchin.api.TagBatch
 import gg.urchin.api.UrchinApi
 import gg.urchin.client.Audience
@@ -10,9 +11,11 @@ import gg.urchin.client.UrchinConfig
 import gg.urchin.client.alerts.Alerts
 import gg.urchin.client.alerts.Party
 import gg.urchin.client.chat.ChatHistory
+import gg.urchin.client.chat.chatSender
 import net.hypixel.data.type.GameType
 import org.apache.logging.log4j.LogManager
 import org.polyfrost.oneconfig.api.event.v1.eventHandler
+import org.polyfrost.oneconfig.api.event.v1.events.ChatEvent
 import org.polyfrost.oneconfig.api.event.v1.events.HypixelLocationEvent
 import org.polyfrost.oneconfig.api.event.v1.events.PacketEvent
 import org.polyfrost.oneconfig.api.event.v1.events.ServerJoinEvent
@@ -33,6 +36,8 @@ object TagLookups {
         private val startedAt = ChatHistory.currentTick()
         private val listed = mutableListOf<ListedPlayer>()
         private val lookedUp = mutableSetOf<UUID>()
+        private val lookedUpNames = mutableSetOf<String>()
+        private val alerted = mutableSetOf<UUID>()
         private var located = false
         private var inGame = false
         private var inReplay = false
@@ -56,6 +61,13 @@ object TagLookups {
                 lookupScheduled = false
                 lookUpListed()
             }
+        }
+
+        fun chatted(name: String) {
+            if (!inGame || !UrchinConfig.enabled || Game.onlinePlayers().any { it.name == name } || !lookedUpNames.add(name)) return
+            UrchinApi.lookupPlayer(name, false).whenCompleteAsync({ result, error ->
+                if (error != null) log.warn("Tag lookup failed for $name", error) else record(listOfNotNull(result?.tagged(name)))
+            }, Game.thread)
         }
 
         private fun lookUpListed() {
@@ -86,8 +98,10 @@ object TagLookups {
 
         private fun alert(tagged: List<TaggedPlayer>) {
             if (!inGame || UrchinConfig.alertsFor == Audience.NOBODY) return
+            val unalerted = tagged.filter { alerted.add(it.account) }
+            if (unalerted.isEmpty()) return
             party.thenRunAsync(
-                { if (this === visit) Alerts.show(tagged) },
+                { if (this === visit) Alerts.show(unalerted) },
                 CompletableFuture.delayedExecutor(UrchinConfig.alertDelay.toLong(), TimeUnit.MILLISECONDS, Game.thread),
             )
         }
@@ -102,6 +116,10 @@ object TagLookups {
             TaggedPlayers.clear()
         }
         eventHandler { _: HypixelLocationEvent -> Game.thread.execute { visit?.enter(HypixelUtils.getLocation()) } }
+        eventHandler { event: ChatEvent.Receive ->
+            val sender = event.message.chatSender() ?: return@eventHandler
+            Game.thread.execute { visit?.chatted(sender) }
+        }
         eventHandler { event: PacketEvent.Receive ->
             val players = Game.playersAddedBy(event.getPacket())
             if (players.isNotEmpty()) Game.thread.execute { visit?.join(players) }
@@ -114,5 +132,10 @@ private fun List<Lookup>.tagged(batch: TagBatch): List<TaggedPlayer> =
         val uuid = account.undashed()
         batch.players[uuid]?.takeIf { it.isNotEmpty() }?.let { TaggedPlayer(player, account, it, batch.displayNames[uuid]) }
     }
+
+private fun PlayerTags.tagged(name: String): TaggedPlayer? {
+    val account = undashedUuid(uuid)?.takeIf { tags.isNotEmpty() } ?: return null
+    return TaggedPlayer(ListedPlayer(account, name, null), account, tags, displayName)
+}
 
 private fun UUID.undashed(): String = toString().replace("-", "")
