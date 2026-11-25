@@ -10,7 +10,7 @@
         //? if = 1.8.9
         //"ChatGuiMixin",
         //? if = 1.8.9
-        //"PlayerEntityMixin",
+        //"LivingEntityRendererMixin",
         //? if = 1.8.9
         //"TextRendererMixin",
         //? if > 1.8.9

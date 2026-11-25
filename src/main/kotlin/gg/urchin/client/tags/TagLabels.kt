@@ -37,9 +37,9 @@ object TagLabels {
             ?.let { insertAfterName(name, player.profile.name, it.formattedString) } ?: name
 
     @JvmStatic
-    fun nametag(player: Player, name: Text): Text =
+    fun nametag(player: Player, name: String): String =
         labelFor(player.uuid, UrchinConfig.nametagLabelsFor)
-            ?.let { LiteralText(insertAfterName(name.formattedString, player.gameProfile.name, it.formattedString)) } ?: name
+            ?.let { insertAfterName(name, player.gameProfile.name, it.formattedString) } ?: name
 
     private fun colored(text: String, color: Formatting): Text = LiteralText(text).setStyle(Style().setColor(color))
     *///?} else {
