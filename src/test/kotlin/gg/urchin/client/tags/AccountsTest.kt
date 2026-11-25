@@ -37,6 +37,19 @@ class AccountsTest {
     }
 
     @Test
+    fun `a replay player whose name was cut to 14 characters is still matched`() {
+        val player = ListedPlayer(PLACEHOLDER, "Fourteen_Chars", textures("Fourteen_Chars_X"))
+        assertEquals(ACCOUNT, accountOf(player, inReplay = true))
+        assertEquals("Fourteen_Chars_X", accountName(player, inReplay = true))
+    }
+
+    @Test
+    fun `only names exactly 14 characters long count as cut`() {
+        assertNull(accountOf(ListedPlayer(PLACEHOLDER, "Thirteen_Char", textures("Thirteen_Chars")), inReplay = true))
+        assertNull(accountOf(ListedPlayer(PLACEHOLDER, "Fourteen_Chars", textures("Fourteen_Other_X")), inReplay = true))
+    }
+
+    @Test
     fun `placeholders outside replays are NPCs`() {
         assertNull(accountOf(ListedPlayer(PLACEHOLDER, "Notch", textures("Notch")), inReplay = false))
     }
