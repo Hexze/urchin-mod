@@ -12,10 +12,8 @@ import gg.urchin.UrchinConstants
 import gg.urchin.api.TagType
 import gg.urchin.client.Account
 import gg.urchin.client.Game
-import gg.urchin.client.ListedPlayer
 import gg.urchin.client.UrchinConfig
-import gg.urchin.client.tags.accountOf
-import gg.urchin.client.tags.isLiveNick
+import gg.urchin.client.tags.accountName
 import net.hypixel.data.type.GameType
 import org.polyfrost.oneconfig.api.commands.v1.CommandManager
 import org.polyfrost.oneconfig.api.commands.v1.CommandManager.literal
@@ -75,9 +73,7 @@ private fun checkPlayers() =
 
 private fun onlineAccountNames(): List<String> {
     val inReplay = HypixelUtils.getLocation().serverType.orElse(null) == GameType.REPLAY
-    return Game.onlinePlayers()
-        .filter { !it.uuid.isLiveNick() && accountOf(it, inReplay) != null }
-        .map(ListedPlayer::name)
+    return Game.onlinePlayers().mapNotNull { accountName(it, inReplay) }
 }
 
 private fun SuggestionsBuilder.suggestMatching(options: List<String>): CompletableFuture<Suggestions> {

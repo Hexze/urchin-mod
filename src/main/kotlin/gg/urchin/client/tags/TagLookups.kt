@@ -45,6 +45,7 @@ object TagLookups {
             inReplay = location.serverType.orElse(null) == GameType.REPLAY
             if (!inReplay && Audience.EVERYONE_BUT_MY_PARTY in UrchinConfig.audiences) party = Party.refresh()
             lookUpListed()
+            if (UrchinConfig.enabled) listed.clear()
         }
 
         fun join(players: List<ListedPlayer>) {
@@ -59,9 +60,15 @@ object TagLookups {
 
         private fun lookUpListed() {
             if (this !== visit || !UrchinConfig.enabled) return
-            listed
-                .mapNotNull { player -> accountOf(player, inReplay)?.let { Lookup(player, it) } }
-                .filter { lookedUp.add(it.player.uuid) }
+            val lookups = mutableListOf<Lookup>()
+            listed.retainAll { player ->
+                if (player.uuid in lookedUp) return@retainAll false
+                val account = accountOf(player, inReplay) ?: return@retainAll true
+                lookedUp += player.uuid
+                lookups += Lookup(player, account)
+                false
+            }
+            lookups
                 .chunked(MAX_BATCH_UUIDS)
                 .forEach { batch ->
                     UrchinApi.lookupTags(batch.map { it.account.undashed() }).whenCompleteAsync({ result, error ->

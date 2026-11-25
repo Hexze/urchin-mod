@@ -29,17 +29,21 @@ import java.util.Optional
 //?}
 
 object TagLabels {
+    private val labels = TagType.entries.associateWith(::label)
+
     //? if = 1.8.9 {
-    /*@JvmStatic
+    /*private val formattedLabels = labels.mapValues { it.value.formattedString }
+
+    @JvmStatic
     fun tabName(player: PlayerInfo, name: String): String =
-        labelFor(player.profile.id, UrchinConfig.tabLabelsFor)
+        shownTagFor(player.profile.id, UrchinConfig.tabLabelsFor)
             ?.takeUnless { shownByStarfish(name) }
-            ?.let { insertAfterName(name, player.profile.name, it.formattedString) } ?: name
+            ?.let { insertAfterName(name, player.profile.name, formattedLabels.getValue(it)) } ?: name
 
     @JvmStatic
     fun nametag(player: Player, name: String): String =
-        labelFor(player.uuid, UrchinConfig.nametagLabelsFor)
-            ?.let { insertAfterName(name, player.gameProfile.name, it.formattedString) } ?: name
+        shownTagFor(player.uuid, UrchinConfig.nametagLabelsFor)
+            ?.let { insertAfterName(name, player.gameProfile.name, formattedLabels.getValue(it)) } ?: name
 
     private fun colored(text: String, color: Formatting): Text = LiteralText(text).setStyle(Style().setColor(color))
     *///?} else {
@@ -54,6 +58,8 @@ object TagLabels {
         labelFor(player.uuid, UrchinConfig.nametagLabelsFor)?.let { insertAfterName(name, player.gameProfile.name(), it) } ?: name
 
     private fun colored(text: String, color: Formatting): MutableComponent = Text.literal(text).withStyle(color)
+
+    private fun labelFor(player: UUID, audience: Audience): Text? = shownTagFor(player, audience)?.let(labels::getValue)
 
     private fun insertAfterName(text: Text, playerName: String, label: Text): Text {
         val labeled = Text.empty()
@@ -76,8 +82,8 @@ object TagLabels {
 
     private fun shownByStarfish(name: String): Boolean = StarfishPlugin.listening && containsTagBadge(name)
 
-    private fun labelFor(player: UUID, audience: Audience): Text? =
-        TaggedPlayers.topTagFor(player, audience)?.takeIf { UrchinConfig.enabled }?.let(::label)
+    private fun shownTagFor(player: UUID, audience: Audience): TagType? =
+        if (UrchinConfig.enabled) TaggedPlayers.topTagFor(player, audience) else null
 
     private fun label(type: TagType): Text =
         colored(" [", Formatting.DARK_GRAY)
