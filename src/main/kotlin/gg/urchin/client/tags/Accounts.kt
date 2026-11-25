@@ -5,6 +5,7 @@ import gg.urchin.client.ListedPlayer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.util.Base64
+import java.util.Collections
 import java.util.UUID
 
 private const val PLAYER_UUID_VERSION = 4
@@ -12,6 +13,7 @@ private const val LIVE_NICK_UUID_VERSION = 1
 private const val UUID_HEX_LENGTH = 32
 private const val HALF_UUID_HEX_LENGTH = 16
 private const val HEX_RADIX = 16
+private const val MAX_CACHED_PROFILES = 512
 
 @Serializable
 private class SkinProfile(val profileId: String, val profileName: String, val textures: SkinTextures = SkinTextures()) {
@@ -42,7 +44,16 @@ private fun recordedAccount(player: ListedPlayer): UUID? {
     return if (profile.profileName == player.name) undashedUuid(profile.profileId) else null
 }
 
+private val skinProfiles: MutableMap<String, SkinProfile?> = Collections.synchronizedMap(
+    object : LinkedHashMap<String, SkinProfile?>(MAX_CACHED_PROFILES, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, SkinProfile?>) = size > MAX_CACHED_PROFILES
+    },
+)
+
 private fun skinProfile(textures: String): SkinProfile? =
+    if (textures in skinProfiles) skinProfiles[textures] else decodeSkinProfile(textures).also { skinProfiles[textures] = it }
+
+private fun decodeSkinProfile(textures: String): SkinProfile? =
     try {
         apiJson.decodeFromString<SkinProfile>(Base64.getDecoder().decode(textures).decodeToString())
     } catch (_: IllegalArgumentException) {

@@ -1,6 +1,7 @@
 package gg.urchin.client.chat
 
 import gg.urchin.api.TagType
+import java.util.concurrent.ConcurrentHashMap
 
 private const val NAME_CHAR = "[A-Za-z0-9_]"
 private const val FORMATTING_CODE = "§[0-9a-fk-orA-FK-OR]"
@@ -9,7 +10,7 @@ private val TAG_ICONS = TagType.entries.joinToString("|") { Regex.escape(it.icon
 private val TAG_BADGE = """\[(?:$FORMATTING_CODE)*(?:$TAG_ICONS)(?:$FORMATTING_CODE)*]"""
 private val ANY_TAG_BADGE = Regex(TAG_BADGE)
 private val LEADING_TAG_BADGE = Regex("""(?:$FORMATTING_CODE|\s)*$TAG_BADGE""")
-private val singleNamePatterns = HashMap<String, Regex>()
+private val singleNamePatterns = ConcurrentHashMap<String, Regex>()
 
 fun namePattern(names: Collection<String>): Regex =
     Regex("(?:(?<=$FORMATTING_CODE)|(?<!$NAME_CHAR))(?:${names.joinToString("|") { Regex.escape(it) }})(?!$NAME_CHAR)")
