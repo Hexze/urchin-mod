@@ -1,8 +1,11 @@
 package gg.urchin.client
 
 import gg.urchin.api.Tag
+import gg.urchin.api.TagType
 import java.util.UUID
 
 data class ListedPlayer(val uuid: UUID, val name: String, val textures: String?)
 
-data class TaggedPlayer(val player: ListedPlayer, val account: UUID, val tags: List<Tag>, val displayName: String?)
+data class TaggedPlayer(val player: ListedPlayer, val account: UUID, val tags: List<Tag>, val displayName: String?) {
+    val topType: TagType? = tags.minByOrNull { it.type.priority }?.type
+}

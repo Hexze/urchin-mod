@@ -24,7 +24,7 @@ object TaggedPlayers {
     fun namesFor(audience: Audience): Set<String> = byName.filterValues { audience.includes(it.account) }.keys
 
     fun topTagFor(uuid: UUID, audience: Audience): TagType? =
-        byUuid[uuid]?.takeIf { audience.includes(it.account) }?.tags?.minByOrNull { it.type.priority }?.type
+        byUuid[uuid]?.takeIf { audience.includes(it.account) }?.topType
 
     fun tagsNamed(name: String): List<Tag> = byName[name]?.tags.orEmpty()
 }
